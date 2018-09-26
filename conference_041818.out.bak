@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Semantics for macro-ARM assembler and C}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Semantics for macro-ARM}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Semantics for IMP with procedure call}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Integrate C and ARM Semantics}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Semantics of the Integrated language}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Simulation and Application of the Integrated Semantics}{}% 7
+\BOOKMARK [2][-]{subsection.4.1}{Implement the Semantics in K framework}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.2}{Application of the formal semantics}{section.4}% 9
+\BOOKMARK [1][-]{section.5}{Automatic Verification of Multi-language Program}{}% 10
+\BOOKMARK [2][-]{subsection.5.1}{The interruption mechanism of ARM ISA}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.2}{Verifying the interruption mechanism}{section.5}% 12
+\BOOKMARK [1][-]{section.6}{Discussion and Conclusion}{}% 13
+\BOOKMARK [1][-]{section*.1}{References}{}% 14
