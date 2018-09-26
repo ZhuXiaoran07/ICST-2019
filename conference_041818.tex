@@ -480,10 +480,10 @@ requires S>=Int 0
 \par The cell $<k>$ stores instructions of the loop and $END$ means the execution gets out of the loop. S is the parameter passed from IMP program, which is stored in the first register indexed by 0. S1 is the partial sum so far and I is the next number to be added. The result is stored in register $r1$, whose final value is $S1 +Int I *Int (I +Int 1)/Int 2$.
 \par Given these two rechability claims, the $\mathbb{K}$ verifier verifies that this integrated-language executes correctly. The verification result also demonstrates the soundness of our semantics to some extend.
 \section{Automatic Verification of Multi-language Program}
-\par Our semantics has some industrial value in verifying some embedded systems. In processors of ARM7 architecture, the interruption mechanism is implemented in mixed language, i.e., C and assembly language. 
+\par Our semantics has some industrial value in verifying some embedded systems. In processors of ARM7 architecture, the interruption mechanism is implemented in mixed language, i.e., C and assembly language.
 \subsection{The interruption mechanism of ARM ISA}
 \par The implementation of an OS kernel asks to disable and enable interrupts in some special cases. For instance, when scheduling happens disabling interrupt is needed in the process of selecting the next running task (or process). The interrupt control bit is stored in the register CPSR. The register can only be accessed by assembly instructions and the scheduling mechanism is often implemented in C to avoid redundancy.
-\par The function of disabling interrupt is to store the value of register CPSR in the stack 
+\par The function of disabling interrupt is to store the value of register CPSR in the stack. And then set the interrupt control bit with 1, which means masking the interrupt.
 \begin{lstlisting}[xleftmargin=1em]
 DisableAllInterrupts					
 			mrs r7, CPSR								
