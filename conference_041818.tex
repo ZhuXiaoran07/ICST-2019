@@ -71,7 +71,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Paper Title*\\
+\title{Formal semantics of mixed language and its application\\
 {\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
 should not be used}
 \thanks{Identify applicable funding agency here. If none, delete this.}
@@ -127,6 +127,11 @@ component, formatting, style, styling, insert
 \end{IEEEkeywords}
 
 \section{Introduction}
+\par Defining formal semantics has been proven to be an efficient way to verifying software systems. For instance, 
+%formal semantics 在确保可靠性方面很重要
+%有的系统实现用的是mixed language，通常对这种系统是抽象一部分实现验证
+%integrate semantics
+%our contribution
 \section{Semantics for macro-ARM assembler and C}
 \subsection{Semantics for macro-ARM}
 The ARM instruction set provides programmers with a hardware-oriented assembly programming language. To formalize it, first we need to provide the abstract syntax of the given language. Then we define the configuration of the machine state. Finally, we give the operational semantics for the instructions.
@@ -225,8 +230,8 @@ $~~~~~<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$\\ \\
 \subsection{Semantics for IMP with procedure call}
 
 \par  The syntax of C is presented in BNF form. $e$ is defined as expressions, including arithmetic expression and boolean expression. It is clear that the symbols $e_1$ and $e_2$ are being used to stand for any arithmetic expression. In our presentation of syntax we use such metavariables to range over the syntactic sets-the metavariables $e_1$ and $e_2$ above are understood to range over the set of arithmetic expressions.  The symbol ``::=" should be read as ``can be" and the symbol ``$|$" as ``or". Thus as arithmetic expression $e$ can be an integer or an identifier, or (arithmetic or boolean) expression. As for the statements, we are concerning some basic statements, such as assignment statement, condition statement, loop statement and statements related to function call and function return.
-
-\begin{math}
+\begin{figure*}
+\begin{displaymath}
 \small
 \begin{array}{l l l}
 \hline\\
@@ -237,7 +242,8 @@ FunctionCall&::=&Id(e)\\\\
 \hline
 
 \end{array}
-\end{math}
+\end{displaymath}
+\end{figure*}
 
 \par An IMP with procedure call configuration is shown in the below, which consists of a global, byte-addressable memory $Mem::N\mapsto B$, an environment $Env::Id\mapsto N$, a function frame stores the defined functions and a function stack to store context when function call occurs. \\ \\
 $\textbf{Configuration.}$\\
@@ -483,7 +489,7 @@ requires S>=Int 0
 \par Our semantics has some industrial value in verifying some embedded systems. In processors of ARM7 architecture, the interruption mechanism is implemented in mixed language, i.e., C and assembly language.
 \subsection{The interruption mechanism of ARM ISA}
 \par The implementation of an OS kernel asks to disable and enable interrupts in some special cases. For instance, when scheduling happens disabling interrupt is needed in the process of selecting the next running task (or process). The interrupt control bit is stored in the register CPSR. The register can only be accessed by assembly instructions and the scheduling mechanism is often implemented in C to avoid redundancy.
-\par The function of disabling interrupt is to store the value of register CPSR in the stack. And then set the interrupt control bit with 1, which means masking the interrupt.
+\par The function of disabling interrupt is to store the value of register CPSR in the stack. And then set the interrupt control bit with 1, which means masking the interrupt. In another case, enabling interrupt is to clear the interrupt control bit. The implementation of disabling and enabling interrupt is listed in the following.
 \begin{lstlisting}[xleftmargin=1em]
 DisableAllInterrupts					
 			mrs r7, CPSR								
@@ -500,7 +506,29 @@ EnableAllInterrupts
 			msr CPSR, r7							
 END									
 \end{lstlisting}
+\par The above two interrupt functions are often called in pairs when atomic operation is needed. For instance, an atomic operation context switch should take place when the system call schedule is called, which means the functions $DisableAllInterrupts$ and $EnableAllInterrupts$ are being called in case of performing scheduling. As we know, the $schedule$ system call is often implemented in high level language (i.e., C language) except the operations which need to access registers. Thus the implementation of $schedule$ is in mixed language. We take this system call as an example to demonstrate how our semantics can be applied to verify operating system kernels.
+%调度时关中断的必要性，调度程序的性质
 \subsection{Verifying the interruption mechanism}
+\par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) kernel, whose formal semantics of system calls have been defined in \cite{}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
+\par We integrate our semantics with the semantics defined in \cite{} to apply our semantics on verifying operating systems. since we have only defined semantics for some basic C statements exclude pointers, arrays and some other complex data structures at present, we regard the statement with such data structures as a special statement and define its execution rule in our semantics. The implementation of the OSEK-based system call $schedule()$ is shown in figure \ref{}
+\begin{lstlisting}[xleftmargin=1em]
+schedule()
+{
+DisableAllInterrupts();
+if (OSReadyQueue.First.Prio>OSRunningTcb.Prio)
+{
+nextTask.Tcb=OSReadyQueue(First.Tcb);
+OSReadyQueueRemove(First.Id, First.Prio);
+OSReadyQueueAppend(osRunningTask, osRunningTcb.Prio);
+OSRunningTcb=nextTask.Tcb;
+}
+else{}
+EnableAllInterrupts();
+}
+\end{lstlisting}	
+\section{related work}
+\subsection{integrate semantics}
+\subsection{verification of systems implemented in mixed language}
 \section{Discussion and Conclusion}
 
 \begin{thebibliography}{00}
