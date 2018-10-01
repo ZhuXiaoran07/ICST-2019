@@ -40,7 +40,7 @@
  	backgroundcolor=\color{backcolour},
  	flexiblecolumns=false,
  	%language=C,
- 	basicstyle=\ttfamily\small,
+ 	basicstyle=\ttfamily\normalsize,
  	breaklines=true,
  	extendedchars=true,
  	escapechar=\%,
@@ -55,7 +55,7 @@
  	%morekeywords={*,TASK,EVENT, RESOURCE, ALARM, COUNTER, *,include...}
  	tabsize=4}
  \lstdefinestyle{k}{
-    basicstyle=\small\ttfamily,
+    basicstyle=\normalsize\ttfamily,
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
@@ -116,24 +116,9 @@ should not be used}
 \maketitle
 
 \begin{abstract}
-Formal verification has been recognized as an essential
-part in improving the correctness and soundness of OS
-kernels. The verification of OS kernels faces many challenges.
-For example, the formal proof always comes with difficulties
-and non-trivial cost. Researchers often have to verify the OS
-kernel in high level programming languages and ignore low level
-languages. In this paper, we propose a framework for verifying
-the whole OS kernel with a low proof burden. We claim it as an
-end-to-end automated verification framework for the purposes
-of: (1) verifying the OS kernel that consists of assembler and
-C languages by formally modeling assembler programs in C
-level; (2) reasoning the verification with no manual proofs on the
-basis of SMT. We successfully apply the framework to automatic
-verifying a commercial operating system $\mu$C/OS-II in different
-hardware architecture, including all the 74 system calls and
-the core written in mixed-language (i.e., assembler and C). Our
-framework helps to catch several overflows and type mismatch
-vulnerabilities of $\mu$ C/OS-II kernel.
+Formal methods have been recognized as complementary means to software testing to improve the reliability of systems. Formally analyzing a system or a program requires formal semantics of its implemented language to avoid ambiguous interpretations. Most of the semantic analysis tools face on monolingual implementations, while some safety-critical systems are implemented in more than one languages (mixed language). For example, most of operating system kernels are implemented in assembler and high level language (e.g., C language). In this paper, we propose an approach to automatically verifying systems implemented in mixed language by integrating the semantics of two different languages. The integrated semantics is implemented in a rewrite-based executable semantic framework named $\mathbb{K}$, with which we verify sum program with loop implemented by mixed language. Furthermore, we adopt our semantics on verifying the schedule mechanism of an industrial automobile operating system kernel.
+
+%Formal verification has been recognized as an essential part in improving the correctness and soundness of OS kernels. The verification of OS kernels faces many challenges. For example, the formal proof always comes with difficulties and non-trivial cost. Researchers often have to verify the OS kernel in high level programming languages and ignore low level languages. In this paper, we propose a framework for verifying the whole OS kernel with a low proof burden. We claim it as an end-to-end automated verification framework for the purposes of: (1) verifying the OS kernel that consists of assembler and C languages by formally modeling assembler programs in C level; (2) reasoning the verification with no manual proofs on the basis of SMT. We successfully apply the framework to automatic verifying a commercial operating system $\mu$C/OS-II in different hardware architecture, including all the 74 system calls and the core written in mixed-language (i.e., assembler and C). Our framework helps to catch several overflows and type mismatch vulnerabilities of $\mu$ C/OS-II kernel.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -141,29 +126,29 @@ formal semantics, verification, operating system, $\mathbb{K}$ framework
 \end{IEEEkeywords}
 
 \section{Introduction}
-\par As a complementary approach to testing, formal methods have been prove to be an efficient way to  guarantee the correctness and soundness of software system. 
+\par As a complementary approach to testing, formal methods have been prove to be an efficient way to  guarantee the correctness and soundness of software system.
 We adhere that formal analysis of systems or programs should be based on the formal semantics of the implemented language rather than on the informal specification because informal specification may cause ambiguities.
 %引出formal semantics
  Formal methods has the capability to conduct an exhaustive exploration of the software behaviors, which is necessary for ensuring correctness of safety-critical systems such as operating systems and an exhaustive systems.
 
  There are many challenges on formally verifying operating systems. For example, operating systems are usually implemented in a mix of assembly and high-level language like C. To our best knowledge, there is no formal tools which could verify a system implemented in a mix language. A traditional approach to verifying such a system is to abstracting the assembly part to a high level. However, it is difficult to ensure the soundness of the abstraction. Besides, developers need to abstract a model for every system, which brings some extra effort in formal verification. Another way is to translate high level language to assembly, where a fully verified compiler (or translator) is necessary.
- 
- Recently, some researchers are paying attentions to defining semantics for mixed language to verify a system implemented in more than one languages. For instance, Schmaltz et. al \cite{} integrate the semantics of C and assembler to verify operating systems and hypervisors. However, it is not easy to check the soundness of their semantics and the pen-and-paper proof is non-trivial. A checkable semantics with an automated toolkit for system analysis is expected. 
- 
+
+ Recently, some researchers are paying attentions to defining semantics for mixed language to verify a system implemented in more than one languages. For instance, Schmaltz et. al \cite{} integrate the semantics of C and assembler to verify operating systems and hypervisors. However, it is not easy to check the soundness of their semantics and the pen-and-paper proof is non-trivial. A checkable semantics with an automated toolkit for system analysis is expected.
+
  $\mathbb{K}$ is a rewrite-based executable semantic framework for program or system analysis. The semantics defined in $\mathbb{K}$ is testable thanks to its executability. Besides, $\mathbb{K}$ provides a set of program analysis tools, such as model checker, deductive
  program verifier and a cross language program
  equivalence checker. $\mathbb{K}$ has been successfully applied in many industrial languages, such as C, java and javasript. In particular, C semantics in $\mathbb{K}$ passed 99.2\% of the test cases for GCC, and has been commercialized by companies to verify the correctness and safety of C programs.
- 
+
  In this paper, we are focusing on achieving the goal of formally analyzing systems implemented in mixed language. Firstly, we extend the IMP language by adding the function call and function return statements. Then we define formal semantics for IMP with function call and some commonly used ARM assembler respectively. Next we integrate the semantics for IMP with function call and the assembler and implement the semantics in $\mathbb{K}$ framework. We adopt it on running and verifying a sum program implemented in mixed language with the underlying interpretation and verification engine of $\mathbb{K}$. Furthermore, we conduct a case study on formally analyzing an industrial automobile operating system kernel to demonstrate the usefulness of our integrated semantics. To be more specific, our contribution can be summarized as:
 \begin{itemize}
 	\item defining the semantics for IMP with function call and commonly used assembler, and integrating them together;
 	\item implementing the integrated semantics in $\mathbb{K}$ framework and verifying a sum program implemented in mixed languages;
-	\item formally analyzing the schedule mechanism of OSEK/VDX based automobile operating system with our semantics. 
+	\item formally analyzing the schedule mechanism of OSEK/VDX based automobile operating system with our semantics.
 \end{itemize}
- 
+
  The rest of this paper is organized as follows. Section II defines the semantics for assembler and C respectively. Section III integrates the semantics of two languages. Section IV implements the semantics in $\mathbb{K}$ framework and applies the integrated semantics on verifying a program implemented in mixed language. Section V demonstrates how our approach can be adopted to verifying the interrupt mechanism of operating system kernel. Finally, we discuss some related
  work in Section VI and make a conclusion in Section VII.
- 
+
 %formal semantics ��ȷ���ɿ��Է�������Ҫ
 %�е�ϵͳʵ���õ���mixed language��ͨ��������ϵͳ�ǳ���һ����ʵ����֤
 %K
@@ -452,7 +437,7 @@ to automatically prove the reachability theorems over the language's execution s
 \par The $\mathbb{K}$ prover accepts reachability claims in the same format as semantic rules.
 Instead of interpreting the supplied module as axioms (like the modules in the semantics itself), the module is interpreted as a set of reachability claims.
 \par We adopt the verifier of $\mathbb{K}$ in verifying programs implemented in integrated language. Suppose we want to sum the numbers from 1 to s by the function $loop(s)$ and then return the result to the IMP program. The main function is implemented in IMP while the $loop$ function is implemented in assembler
-\begin{lstlisting}[multicols=2,xleftmargin=1em]
+\begin{lstlisting}
 int main()
 {
 int s;
@@ -473,7 +458,7 @@ END
 
 \lstset{style=k}
 \begin{minipage}{0.7\textwidth}
-\fontsize{7.8}{9.36}\selectfont
+%\fontsize{7.8}{9.36}\selectfont
 \begin{BVerbatim}
 rule
 <k>
@@ -485,16 +470,16 @@ loop(S:Int)=>S...</k>
 <sreg>.Map=>Sreg:Map</sreg>
 requires S>=Int 0
 \end{BVerbatim}
-\end{minipage}
+\end{minipage}\\
 
 \par This states that the statement for calling function $loop$ with parameter S is to be executed. The right hand side of the $k$ cell states that the return value of function should be S. The elements in cells $<env>,~<store>$ and $<fun>$ are to be read but will not be modified in the verification. Since the function $loop$ is implemented by assembly code, the cells $<reg>$ and $<sreg>$ would be modified while we do not care about the exact information of them.
 \par As the program has a loop, we need to supply a circularity which helps
 reason about how the remainder of the program behaves after any iteration of the loop. Note this is not quite
-the same as an invariant stating that each iteration of the loop maintains the partial sum. Reachability Logic allows specifying the traditional Hoare Logic rule as a loop invariant and performing proofs that way, but specifying circularities directly instead can be more intuitive and robust to changes in the program.
+the same as an invariant stating that each iteration of the loop maintains the partial sum. Reachability Logic allows specifying the traditional Hoare Logic rule as a loop invariant and performing proofs that way, but specifying circularities directly instead can be more intuitive and robust to changes in the program.\\
 
 \lstset{style=k}
 \begin{minipage}{0.35\textwidth}
-\fontsize{7.8}{9.36}\selectfont
+%\fontsize{7.8}{9.36}\selectfont
 \begin{BVerbatim}
 rule
 <k>
@@ -518,7 +503,7 @@ END
 <sreg>...0 |-> (_=>true)...</sreg>
 requires S>=Int 0
 \end{BVerbatim}
-\end{minipage}
+\end{minipage}\\
 
 \par The cell $<k>$ stores instructions of the loop and $END$ means the execution gets out of the loop. S is the parameter passed from IMP program, which is stored in the first register indexed by 0. S1 is the partial sum so far and I is the next number to be added. The result is stored in register $r1$, whose final value is $S1 +Int I *Int (I +Int 1)/Int 2$.
 \par Given these two rechability claims, the $\mathbb{K}$ verifier verifies that this integrated-language executes correctly. The verification result also demonstrates the soundness of our semantics to some extend.
@@ -565,7 +550,7 @@ EnableAllInterrupts();
 \end{lstlisting}	
 \section{related work}
 \subsection{integrate semantics}
-\subsection{verification of systems implemented in mixed language}
+\subsection{K }
 \section{Discussion and Conclusion}
 
 \begin{thebibliography}{00}
