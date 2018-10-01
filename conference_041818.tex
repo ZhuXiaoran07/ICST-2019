@@ -74,9 +74,8 @@
 \title{Formal semantics of mixed language and its application\\
 {\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
 should not be used}
-\thanks{Identify applicable funding agency here. If none, delete this.}
 }
-
+\author{Anonymous}
 %\author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
 %\IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
 %\textit{name of organization (of Aff.)}\\
@@ -117,19 +116,57 @@ should not be used}
 \maketitle
 
 \begin{abstract}
-This document is a model and instructions for \LaTeX.
-This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes,
-or Math in Paper Title or Abstract.
+Formal verification has been recognized as an essential
+part in improving the correctness and soundness of OS
+kernels. The verification of OS kernels faces many challenges.
+For example, the formal proof always comes with difficulties
+and non-trivial cost. Researchers often have to verify the OS
+kernel in high level programming languages and ignore low level
+languages. In this paper, we propose a framework for verifying
+the whole OS kernel with a low proof burden. We claim it as an
+end-to-end automated verification framework for the purposes
+of: (1) verifying the OS kernel that consists of assembler and
+C languages by formally modeling assembler programs in C
+level; (2) reasoning the verification with no manual proofs on the
+basis of SMT. We successfully apply the framework to automatic
+verifying a commercial operating system $\mu$C/OS-II in different
+hardware architecture, including all the 74 system calls and
+the core written in mixed-language (i.e., assembler and C). Our
+framework helps to catch several overflows and type mismatch
+vulnerabilities of $\mu$ C/OS-II kernel.
 \end{abstract}
 
 \begin{IEEEkeywords}
-component, formatting, style, styling, insert
+formal semantics, verification, operating system, $\mathbb{K}$ framework
 \end{IEEEkeywords}
 
 \section{Introduction}
-\par Defining formal semantics has been proven to be an efficient way to verifying software systems. For instance, 
-%formal semantics ÔÚÈ·±£¿É¿¿ÐÔ·½ÃæºÜÖØÒª
-%ÓÐµÄÏµÍ³ÊµÏÖÓÃµÄÊÇmixed language£¬Í¨³£¶ÔÕâÖÖÏµÍ³ÊÇ³éÏóÒ»²¿·ÖÊµÏÖÑéÖ¤
+\par As a complementary approach to testing, formal methods have been prove to be an efficient way to  guarantee the correctness and soundness of software system. 
+We adhere that formal analysis of systems or programs should be based on the formal semantics of the implemented language rather than on the informal specification because informal specification may cause ambiguities.
+%å¼•å‡ºformal semantics
+ Formal methods has the capability to conduct an exhaustive exploration of the software behaviors, which is necessary for ensuring correctness of safety-critical systems such as operating systems and an exhaustive systems.
+
+ There are many challenges on formally verifying operating systems. For example, operating systems are usually implemented in a mix of assembly and high-level language like C. To our best knowledge, there is no formal tools which could verify a system implemented in a mix language. A traditional approach to verifying such a system is to abstracting the assembly part to a high level. However, it is difficult to ensure the soundness of the abstraction. Besides, developers need to abstract a model for every system, which brings some extra effort in formal verification. Another way is to translate high level language to assembly, where a fully verified compiler (or translator) is necessary.
+ 
+ Recently, some researchers are paying attentions to defining semantics for mixed language to verify a system implemented in more than one languages. For instance, Schmaltz et. al \cite{} integrate the semantics of C and assembler to verify operating systems and hypervisors. However, it is not easy to check the soundness of their semantics and the pen-and-paper proof is non-trivial. A checkable semantics with an automated toolkit for system analysis is expected. 
+ 
+ $\mathbb{K}$ is a rewrite-based executable semantic framework for program or system analysis. The semantics defined in $\mathbb{K}$ is testable thanks to its executability. Besides, $\mathbb{K}$ provides a set of program analysis tools, such as model checker, deductive
+ program verifier and a cross language program
+ equivalence checker. $\mathbb{K}$ has been successfully applied in many industrial languages, such as C, java and javasript. In particular, C semantics in $\mathbb{K}$ passed 99.2\% of the test cases for GCC, and has been commercialized by companies to verify the correctness and safety of C programs.
+ 
+ In this paper, we are focusing on achieving the goal of formally analyzing systems implemented in mixed language. Firstly, we extend the IMP language by adding the function call and function return statements. Then we define formal semantics for IMP with function call and some commonly used ARM assembler respectively. Next we integrate the semantics for IMP with function call and the assembler and implement the semantics in $\mathbb{K}$ framework. We adopt it on running and verifying a sum program implemented in mixed language with the underlying interpretation and verification engine of $\mathbb{K}$. Furthermore, we conduct a case study on formally analyzing an industrial automobile operating system kernel to demonstrate the usefulness of our integrated semantics. To be more specific, our contribution can be summarized as:
+\begin{itemize}
+	\item defining the semantics for IMP with function call and commonly used assembler, and integrating them together;
+	\item implementing the integrated semantics in $\mathbb{K}$ framework and verifying a sum program implemented in mixed languages;
+	\item formally analyzing the schedule mechanism of OSEK/VDX based automobile operating system with our semantics. 
+\end{itemize}
+ 
+ The rest of this paper is organized as follows. Section II defines the semantics for assembler and C respectively. Section III integrates the semantics of two languages. Section IV implements the semantics in $\mathbb{K}$ framework and applies the integrated semantics on verifying a program implemented in mixed language. Section V demonstrates how our approach can be adopted to verifying the interrupt mechanism of operating system kernel. Finally, we discuss some related
+ work in Section VI and make a conclusion in Section VII.
+ 
+%formal semantics ï¿½ï¿½È·ï¿½ï¿½ï¿½É¿ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òª
+%ï¿½Ðµï¿½ÏµÍ³Êµï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½mixed languageï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ç³ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½Ö¤
+%K
 %integrate semantics
 %our contribution
 \section{Semantics for macro-ARM assembler and C}
@@ -507,7 +544,7 @@ EnableAllInterrupts
 END									
 \end{lstlisting}
 \par The above two interrupt functions are often called in pairs when atomic operation is needed. For instance, an atomic operation context switch should take place when the system call schedule is called, which means the functions $DisableAllInterrupts$ and $EnableAllInterrupts$ are being called in case of performing scheduling. As we know, the $schedule$ system call is often implemented in high level language (i.e., C language) except the operations which need to access registers. Thus the implementation of $schedule$ is in mixed language. We take this system call as an example to demonstrate how our semantics can be applied to verify operating system kernels.
-%µ÷¶ÈÊ±¹ØÖÐ¶ÏµÄ±ØÒªÐÔ£¬µ÷¶È³ÌÐòµÄÐÔÖÊ
+%ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ð¶ÏµÄ±ï¿½Òªï¿½Ô£ï¿½ï¿½ï¿½ï¿½È³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 \subsection{Verifying the interruption mechanism}
 \par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) kernel, whose formal semantics of system calls have been defined in \cite{}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
 \par We integrate our semantics with the semantics defined in \cite{} to apply our semantics on verifying operating systems. since we have only defined semantics for some basic C statements exclude pointers, arrays and some other complex data structures at present, we regard the statement with such data structures as a special statement and define its execution rule in our semantics. The implementation of the OSEK-based system call $schedule()$ is shown in figure \ref{}
