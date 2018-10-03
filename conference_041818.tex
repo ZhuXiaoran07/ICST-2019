@@ -154,7 +154,8 @@ We adhere that formal analysis of systems or programs should be based on the for
 %K
 %integrate semantics
 %our contribution
-\section{Semantics for macro-ARM assembler and C}
+\section{Semantics for macro-ARM assembler and IMP with function call}
+\par This section defines semantics for the two languages respectively. Since our aim is to verify system kernels by defining semantics for its implementation language. In this paper we are caring a subset of ARM instructions which are frequently used in the operating system kernels. The communication between the two language programs are mainly by function calls. Thus we take IMP, and extend it with function calls, as the high level language in this paper.
 \subsection{Semantics for macro-ARM}
 The ARM instruction set provides programmers with a hardware-oriented assembly programming language. To formalize it, first we need to provide the abstract syntax of the given language. Then we define the configuration of the machine state. Finally, we give the operational semantics for the instructions.
 %\begin{displaymath}
@@ -196,9 +197,8 @@ Instr &::=&~STMDB~sp,~rs~|~STMIB~sp,~rs~|~LDMIA~sp,~rs~|~STR~r_s,~a\\ \\&|&~LDR~
 \label{arm-syntax}
 \end{figure*}
 \par Figure \ref{arm-syntax} shows the syntax of the ARM assembly language. Here we only give some typical instructions that are frequently used in OS implementations. $STMDB$ pushes the value of registers $rs$ into the stack. The expression $sp$ is the stack pointer, whose value is often stored in the register with index 13. $rs$ is the register list. The instruction $STMIB$ is to increase the value of stack pointer and then store the values of registers $rs$ into the stack. $LDMIA$ loads the value of the stack into the registers and then decreases the value of the stack pointer. The instructions $STR$ and $LDR$ are to load the value from memory with address $a$ to a register $r_s$ and store the value of register $r_s$ to the memory address $a$. The instruction $MOV~r_d,~r_s$ is to move the value of register $r_s$ to the destination register $r_d$. $ADD$ ($SUB$) adds (subtracts) the value of two source operand and store the result to the destination operand. Similarly, $ORR$ and $AND$ are two opcodes which compute the logical or and logical and result of the two source registers and store the result to the destination register. Except for operating on general purpose register, there are some instructions that operate on status registers. For instance, $MRS$ and $MSR$ are two opcodes read value from status register to general purpose register and read value from general purpose register to the status register respectively. $B$ and $BL$ are to jump a specific address to execute the instructions. The difference is that the opcode $BL$ should save its current program counter so that it could return after executing the called program.\\
-
 $\textbf{Configuration.}$\\ \\
-$~~~~~~$configuration=($Pro_{asm}::Instr,~Mem::N\mapsto B^8,~GReg::\textit{R}\mapsto B^8,~SReg::\textit{R}\mapsto B^8,~Stack::List$)\\ \\
+$~~~~~~$$Con_{asm}$=($Pro_{asm}::Instr,~Mem::N\mapsto B^8,~GReg::\textit{R}\mapsto B^8,~SReg::\textit{R}\mapsto B^8,~Stack::List$)\\ \\
 
 The configuration of ARM assembler consists of ARM instruction set, a byte-addressable memory $Mem:~N\mapsto B^8$ (where $N$ is the natural number and $B\equiv \{0,~1\}$), two registers, i.e. general purpose register $GReg::\textit{R}\mapsto B^8$ and status register $SReg::\textit{R}\mapsto B^8$ (\textit{R} is the register index and $B^8$ is the register value), and a data stack.\\
 
@@ -333,7 +333,8 @@ $<Mem(Env(e))\circ s_1,~Mem,~Env_1,~Fun,~[stackList/(S_1,~Env_1)\cdot stackList]
 %
 %\end{itemize}
 
-\section{Integrate C and ARM Semantics}
+\section{Integrate IMP-FC and assembler Semantics}
+\par We extend both the IMP with function calls and assembler by allowing the IMP-FC programs call assembler functions and assembler programs call IMP-FC functions. Besides, the operand of assembler instructions could be a C variable. Based on the extension of the two languages, we integrate the semantics for them in this section.
 %\subsection{}
 \subsection{Semantics of the Integrated language}
 \par In order to obtain an integrated model of IMP with procedure call and assembly language, there are two things left to
@@ -383,6 +384,7 @@ $<(OP~R_i,~R_j,~Mem(A_i)),~Mem,~Con_{asm},~Con_c>$\\ \\
 %$\frac{next(C.Pro)=OP~R_i,~R_j,~I~~OP \in (AOpCode ~\cup ~BOpcode) ~~Mem(I)=n~~valid(R_i)=true}{next(C.Pro)=OP~R_i,~R_j,~\#n}$ $~~$ (Assembly opcode reads C variable)\\ \\
 %TODO: Semantics for instructions which access the C variables
 \section{Simulation and Application of the Integrated Semantics}
+\par $\mathbb{K}$ \par We extend both the IMP with function calls and assembler by allowing the IMP-FC programs call assembler functions and assembler programs call IMP-FC functions. Besides, the operand of assembler instructions could be a C variable. Based on the extension of the two languages, we integrate the semantics for them in this section.
 \subsection{Implement the Semantics in K framework}
 The $\mathbb{K}$ Framework is a rewriting based executable semantic framework for defining programming languages, type systems and formal analysis tools using configurations and rules.  We use $\mathbb{K}$ extensively in our work.
 Configurations in $\mathbb{K}$ organize the state in units called cells, which are labeled and can be nested. \emph{Rules} in $\mathbb{K}$ rewrite \emph{configurations} to define valid state transitions. $\mathbb{K}$'s foundations are based in Reachability Logic, which has a sound and relatively complete proof system for
@@ -589,9 +591,9 @@ To reduce the verification efforts, automatic OS kernel verification has long be
 verification at assembly level with Dafny. The verifier deployed by the above works are all based Z3, which is also used by $\mathbb{K}$. Compared with these works, our approach needs no translation of the program. In this case, developers do not need to learn a new language to verify the OS kernel. On the other side, keeping the programs untouched would not affect the readability of the system implementation, which is easier to specify properties for the system.
 \section{Conclusion and Future Work}
 \par This paper presented an integrated semantics for assembler and a high level language. The integrated semantics not only take function calls and function returns between the two languages into account, but also specified the transaction rules for the cases when a global variable could be accessed by different languages. We adopted an executable semantic framework $\mathbb{K}$ to implement our semantics and verified the correctness of a mixed language program. To demonstrate the effectiveness of our semantics, we applied it to verifying the schedule mechanism of an industrial operating system kernel.
-\par As future work, we are considering to 
+\par As future work, we are considering to
  apply our semantics in verifying some critical parts of operating system kernels, such as memory allocation and context switch, which are implemented in mixed language. To achieve this goal, we have to complete our semantics for high level language since the implementation of operating system kernel involves many complex data structures, such as pointers and lists. Thanks to the $\mathbb{K}$
-semantics of C, it can be attained by integrating $\mathbb{K}$ semantics for C and our semantics. 
+semantics of C, it can be attained by integrating $\mathbb{K}$ semantics for C and our semantics.
 \par Another promising direction we intend to pursue is to verify operating system applications. The basic idea is to specify a rather precise formal semantics for system calls defined in the operating system kernel. \cite{} has defined semantics for system calls of OSEK/VDX operating system kernel. However, they regard s each system call as an atomic statement while
 in practice the execution of a system call be interrupted by the environment or alarms. We are planing to refine their semantics by considering interruptions (i.e., splitting the semantics for system calls at the points where disabling and enabling interrupts are called). In this case, the verification for operating system applications could be more circumspect.
 
