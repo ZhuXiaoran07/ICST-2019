@@ -1,4 +1,4 @@
-\documentclass[letterpaper, 10.5 pt, conference]{IEEEtran}
+\documentclass[letterpaper, 10 pt, conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
@@ -572,7 +572,7 @@ $\mathbb{K}$ also provides executable semantics for java \cite{kjava}, javascrip
 languages, the $\mathbb{K}$ framework defines formal virtual machines for various software systems, such as KEVM [29] for Ethereum Virtual Machine
 [30] and IELE [31] for blockchain system. In particular, $\mathbb{K}$ has  proven its scalability and effectiveness by defining semantics for system services of operating system kernel and verifying operating system applications.
 
-To our best knowledge, the current $\mathbb{K}$ semantics are about single language, while we use $\mathbb{K}$ to bridge the gap between two languages.
+To our best knowledge, the current $\mathbb{K}$ semantics are about single language, while we use $\mathbb{K}$ to bridge the gap between two languages. Furthermore, we demonstrate that $\mathbb{K}$ has the capability of verifying a mixed language program.
 
 \subsection{OS kernel verification}
 Operating system kernel verification has attracted considerable
@@ -587,7 +587,13 @@ a machine-checkable proof and come with a non-trivial cost. In our work, the mix
 
 To reduce the verification efforts, automatic OS kernel verification has long been a research objective. \cite{hyperkernel} translates both C and assembler implementations to LLVM and adopts the LLVM verifier to verify the correctness of the OS kernel. \cite{jizheng} abstract the assembler programs to C level and verify the OS kernel with the C verifier. [10] compiles C to assembler and conducts all
 verification at assembly level with Dafny. The verifier deployed by the above works are all based Z3, which is also used by $\mathbb{K}$. Compared with these works, our approach needs no translation of the program. In this case, developers do not need to learn a new language to verify the OS kernel. On the other side, keeping the programs untouched would not affect the readability of the system implementation, which is easier to specify properties for the system.
-\section{Discussion and Conclusion}
+\section{Conclusion and Future Work}
+\par This paper presented an integrated semantics for assembler and a high level language. The integrated semantics not only take function calls and function returns between the two languages into account, but also specified the transaction rules for the cases when a global variable could be accessed by different languages. We adopted an executable semantic framework $\mathbb{K}$ to implement our semantics and verified the correctness of a mixed language program. To demonstrate the effectiveness of our semantics, we applied it to verifying the schedule mechanism of an industrial operating system kernel.
+\par As future work, we are considering to 
+ apply our semantics in verifying some critical parts of operating system kernels, such as memory allocation and context switch, which are implemented in mixed language. To achieve this goal, we have to complete our semantics for high level language since the implementation of operating system kernel involves many complex data structures, such as pointers and lists. Thanks to the $\mathbb{K}$
+semantics of C, it can be attained by integrating $\mathbb{K}$ semantics for C and our semantics. 
+\par Another promising direction we intend to pursue is to verify operating system applications. The basic idea is to specify a rather precise formal semantics for system calls defined in the operating system kernel. \cite{} has defined semantics for system calls of OSEK/VDX operating system kernel. However, they regard s each system call as an atomic statement while
+in practice the execution of a system call be interrupted by the environment or alarms. We are planing to refine their semantics by considering interruptions (i.e., splitting the semantics for system calls at the points where disabling and enabling interrupts are called). In this case, the verification for operating system applications could be more circumspect.
 
 \begin{thebibliography}{00}
 \bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
