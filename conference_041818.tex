@@ -116,7 +116,7 @@ should not be used}
 \maketitle
 
 \begin{abstract}
-Formal methods have been recognized as complementary means to software testing to improve the reliability of systems. Formally analyzing a system or a program requires formal semantics of its implemented language to avoid ambiguous interpretations. Most of the semantic analysis tools face on monolingual implementations, while some safety-critical systems are implemented in more than one languages (mixed language). For example, most of operating system kernels are implemented in assembler and high level language (e.g., C language). In this paper, we propose an approach to automatically verifying systems implemented in mixed language by integrating the semantics of two different languages. The integrated semantics is implemented in a rewrite-based executable semantic framework named $\mathbb{K}$, with which we verify sum program with loop implemented by mixed language. Furthermore, we adopt our semantics on verifying the schedule mechanism of an industrial automobile operating system kernel.
+Formal methods have been recognized as complementary means to software testing to improve the reliability of systems. Formally analyzing a system or a program requires formal semantics of its implemented language or specification to avoid ambiguous interpretations. To our best knowledge, most of the semantic analysis tools face on monolingual implementations, while some safety-critical systems are implemented in more than one languages (mixed language). For example, most of operating system kernels are implemented in assembler and high level language (e.g., C language). In this paper, we propose an approach to automatically verifying systems implemented in mixed language. We define semantics for the high level language and assembler respectively, and then integrate them together. The integrated semantics is implemented in a rewrite-based executable semantic framework named $\mathbb{K}$, with which we verify a demo loop program implemented by mixed language. Furthermore, we demonstrate the effective of our semantics by adopting it on verifying the schedule mechanism of an industrial automobile operating system kernel.
 
 %Formal verification has been recognized as an essential part in improving the correctness and soundness of OS kernels. The verification of OS kernels faces many challenges. For example, the formal proof always comes with difficulties and non-trivial cost. Researchers often have to verify the OS kernel in high level programming languages and ignore low level languages. In this paper, we propose a framework for verifying the whole OS kernel with a low proof burden. We claim it as an end-to-end automated verification framework for the purposes of: (1) verifying the OS kernel that consists of assembler and C languages by formally modeling assembler programs in C level; (2) reasoning the verification with no manual proofs on the basis of SMT. We successfully apply the framework to automatic verifying a commercial operating system $\mu$C/OS-II in different hardware architecture, including all the 74 system calls and the core written in mixed-language (i.e., assembler and C). Our framework helps to catch several overflows and type mismatch vulnerabilities of $\mu$ C/OS-II kernel.
 \end{abstract}
@@ -178,24 +178,27 @@ The ARM instruction set provides programmers with a hardware-oriented assembly p
 %\end{array}
 %\end{displaymath}
 
-\begin{figure*}
+\begin{figure}
 \begin{displaymath}
 \begin{array}{l l l}
 \hline\\
-word~~~~~\omega \in Int_{32} \\ \\
-Greg~~~~~r &::=&~r_0~|~r_1~|~...~|~r_{31} \\ \\
-Sreg~~~~~sr &::=&~CPSR~|~SPSR \\ \\
-Addrr~~~~a &::=&~\omega~|~[r]~|~[r_i]+[r_j] \\ \\
-r_d~~~~~~r_d &::=&~Greg~|~Sreg\\ \\
-r_s~~~~~~r_s &::=&~\omega~|~Greg~|~Sreg~|~a \\ \\
-Instr &::=&~STMDB~sp,~rs~|~STMIB~sp,~rs~|~LDMIA~sp,~rs~|~STR~r_s,~a\\ \\&|&~LDR~r_d,~a~|~MOV~r_d,~r_s~|~ADD~r_d,~r_s,~r_s~|~SUB~r_d,~r_s,~r_s\\ \\&|&~ORR~r_d,~r_s,~r_s~|~AND~r_d,~r_s,~r_s~|~MRS~r_d,~sr~|~MSR~sr,~r_d\\ \\&|&~B~Id~|~BL~Id\\ \\
+word~~\omega \in Int_{32} \\ \\
+Greg~r &::=&~r_0~|~r_1~|~...~|~r_{31} \\ \\
+Sreg~sr &::=&~CPSR~|~SPSR \\ \\
+Addr~a &::=&~\omega~|~[r]~|~[r_i]+[r_j] \\ \\
+r_d~~r_d &::=&~Greg~|~Sreg\\ \\
+r_s~~r_s &::=&~\omega~|~Greg~|~Sreg~|~a \\ \\
+Instr &::=&~STMDB~sp,~rs\\ \\&|&STMIB~sp,~rs\\
+\\&|&~LDMIA~sp,~rs\\
+\\&|&~STR~r_s,~a\\ \\&|&~LDR~r_d,~a\\
+\\&|&~MOV~r_d,~r_s\\ \\&|&ADD~r_d,~r_s,~r_s\\ \\&|&SUB~r_d,~r_s,~r_s\\ \\&|&~ORR~r_d,~r_s,~r_s\\ \\&|&AND~r_d,~r_s,~r_s\\ \\&|&MRS~r_d,~sr\\ \\&|&MSR~sr,~r_d\\ \\&|&~B~Id~\\ \\&|&BL~Id\\ \\
 \hline
 
 \end{array}
 \end{displaymath}
 \caption{The syntax of the ARM assembly language}
 \label{arm-syntax}
-\end{figure*}
+\end{figure}
 \par Figure \ref{arm-syntax} shows the syntax of the ARM assembly language. Here we only give some typical instructions that are frequently used in OS implementations. $STMDB$ pushes the value of registers $rs$ into the stack. The expression $sp$ is the stack pointer, whose value is often stored in the register with index 13. $rs$ is the register list. The instruction $STMIB$ is to increase the value of stack pointer and then store the values of registers $rs$ into the stack. $LDMIA$ loads the value of the stack into the registers and then decreases the value of the stack pointer. The instructions $STR$ and $LDR$ are to load the value from memory with address $a$ to a register $r_s$ and store the value of register $r_s$ to the memory address $a$. The instruction $MOV~r_d,~r_s$ is to move the value of register $r_s$ to the destination register $r_d$. $ADD$ ($SUB$) adds (subtracts) the value of two source operand and store the result to the destination operand. Similarly, $ORR$ and $AND$ are two opcodes which compute the logical or and logical and result of the two source registers and store the result to the destination register. Except for operating on general purpose register, there are some instructions that operate on status registers. For instance, $MRS$ and $MSR$ are two opcodes read value from status register to general purpose register and read value from general purpose register to the status register respectively. $B$ and $BL$ are to jump a specific address to execute the instructions. The difference is that the opcode $BL$ should save its current program counter so that it could return after executing the called program.\\
 
 $\textbf{Configuration.}$\\ \\
@@ -253,20 +256,20 @@ $~~~~~<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$\\ \\
 \subsection{Semantics for IMP with procedure call}
 
 \par  The syntax of C is presented in BNF form. $e$ is defined as expressions, including arithmetic expression and boolean expression. It is clear that the symbols $e_1$ and $e_2$ are being used to stand for any arithmetic expression. In our presentation of syntax we use such metavariables to range over the syntactic sets-the metavariables $e_1$ and $e_2$ above are understood to range over the set of arithmetic expressions.  The symbol ``::=" should be read as ``can be" and the symbol ``$|$" as ``or". Thus as arithmetic expression $e$ can be an integer or an identifier, or (arithmetic or boolean) expression. As for the statements, we are concerning some basic statements, such as assignment statement, condition statement, loop statement and statements related to function call and function return.
-\begin{figure*}
+\begin{figure}
 \begin{displaymath}
 \small
 \begin{array}{l l l}
 \hline\\
-stmt &::=&~Id=e ~|~ \texttt{if}~e_1~e_2~\texttt{else}~e_3 |~ \texttt{while}~e_1~e_2 ~|~ FunctionCall ~|~ \texttt{return}~e \\\\
-e &::=&Int~|~Id~|~e_1*e_2~|~e_1+e_2~|~e_1\leq e_2~|~!e~|~e_1\land e_2\\\\
+stmt &::=&~Id=e ~\\ \\&|& \texttt{if}~e_1~e_2~\texttt{else}~e_3\\ \\& |& \texttt{while}~e_1~e_2 \\ \\&|& FunctionCall \\ \\&|& \texttt{return}~e \\\\
+e &::=&Int\\ \\&|&~Id\\ \\&|&~e_1*e_2\\ \\&|&e_1+e_2\\ \\&|&~e_1\leq e_2\\ \\&|&~!e~\\ \\&|&~e_1\land e_2\\\\
 FunctionCall&::=&Id(e)\\\\
 
 \hline
 
 \end{array}
 \end{displaymath}
-\end{figure*}
+\end{figure}
 
 \par An IMP with procedure call configuration is shown in the below, which consists of a global, byte-addressable memory $Mem::N\mapsto B$, an environment $Env::Id\mapsto N$, a function frame stores the defined functions and a function stack to store context when function call occurs. \\ \\
 $\textbf{Configuration.}$\\
