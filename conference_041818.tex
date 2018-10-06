@@ -133,11 +133,11 @@ We adhere that formal analysis of systems or programs should be based on the for
 
  There are many challenges on formally verifying operating systems. For example, operating systems are usually implemented in a mix of assembly and high-level language like C. To our best knowledge, there is no formal tools which could verify a system implemented in a mix language. A traditional approach to verifying such a system is to abstracting the assembly part to a high level. However, it is difficult to ensure the soundness of the abstraction. Besides, developers need to abstract a model for every system, which brings some extra effort in formal verification. Another way is to translate high level language to assembly, where a fully verified compiler (or translator) is necessary.
 
- Recently, some researchers are paying attentions to defining semantics for mixed language to verify a system implemented in more than one languages. For instance, Schmaltz et. al \cite{} integrate the semantics of C and assembler to verify operating systems and hypervisors. Pentchev extend the work \cite{} with the semantics of interrupt processors. However, their semantics are defined by pen-and paper, and it is not easy to check the soundness of it. Besides, the analysis of operating system based on their semantics is by hand, which is non-trivial. Thus a checkable semantics with an automated toolkit for system analysis is expected.
+ Recently, some researchers are paying attentions to defining semantics for mixed language to verify a system implemented in more than one languages. For instance, Schmaltz et. al \cite{Schmaltz} integrate the semantics of C and assembler to verify operating systems and hypervisors. Pentchev extend the work \cite{Pentchev} with the semantics of interrupt processors. However, their semantics are defined by pen-and paper, and it is not easy to check the soundness of it. Besides, the analysis of operating system based on their semantics is by hand, which is non-trivial. Thus a checkable semantics with an automated toolkit for system analysis is expected.
 
- $\mathbb{K}$ is a rewrite-based executable semantic framework for program or system analysis. The semantics defined in $\mathbb{K}$ is testable thanks to its executability. Besides, $\mathbb{K}$ provides a set of program analysis tools, such as model checker, deductive
- program verifier and a cross language program
- equivalence checker. $\mathbb{K}$ has been successfully applied in many industrial languages, such as C, java and javasript. In particular, C semantics in $\mathbb{K}$ passed 99.2\% of the test cases for GCC, and has been commercialized by companies to verify the correctness and safety of C programs. Furthermore, $\mathbb{K}$ is being deployed to design a new language for secure systems, such as the blockchain.
+ $\mathbb{K}$ \cite{K} is a rewrite-based executable semantic framework for program or system analysis. The semantics defined in $\mathbb{K}$ is testable thanks to its executability. Besides, $\mathbb{K}$ provides a set of program analysis tools, such as model checker \cite{modelchecking}, deductive
+ program verifier \cite{deductive} and a cross language program
+ equivalence checker \cite{equivalence}. $\mathbb{K}$ has been successfully applied in many industrial languages, such as C \cite{C1}, java \cite{java} and javasript \cite{js}. In particular, C semantics in $\mathbb{K}$ passed 99.2\% of the test cases for GCC \cite{ellison}, and has been commercialized by companies to verify the correctness and safety of C programs. Furthermore, $\mathbb{K}$ is being deployed to design a new language for secure systems, such as the blockchain system.
 
  With the aim of automatically formally analyzing systems implemented in mixed language, we adopt $\mathbb{K}$ as our semantic analysis tool in this paper.
  %In this paper, we are focusing on achieving the goal of formally analyzing systems implemented in mixed language.
@@ -252,9 +252,13 @@ $<\varepsilon,~Mem,~GReg[value(CPSR)/value(R_i)],~SReg,~Stack>$\\ \\
 \par $MSR$ is shorted for move to state register from register. Same with $MRS$, it also operates on status registers by it replace the value of the CPSR with that of the source register.\\ \\
 $<(\textbf{MSR}~CPSR,~R_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
 $<\varepsilon,~Mem,~GReg,~SReg[value(R_i)/value(CPSR)],~Stack>$\\ \\
-\par The instruction $BL$ jumps directly to a location indicated by the target label X if the target location is within the current procedure body. To integrate with C semantics, we get rid of the program counter in the ARM semantics. Instead, we regard a fragment separated by a label as a procedure, and jumping to a label is considered as a procedure call. Thus executing one step of this instruction is reduced to execute the function body with function name $X$.\\ \\
+\par The instruction $BL$ jumps directly to a location indicated by the target label X if the target location is within the current procedure body. To integrate with C semantics, we get rid of the program counter in the ARM semantics. Instead, we regard a fragment separated by a label as a procedure, and jumping to a label is considered as a procedure call. Thus executing one step of this instruction is reduced to execute the function body with function name $X$. We omit the semantics for instruction $B$ here because they are definitely same.  \\ \\
 $<(\textbf{BL}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
 $<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$\\ \\
+
+\par The instruction $BEQ$ often follows some logical instructions, such as $CMP$. In case the \\\\
+$<(\textbf{BEQ}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
+
 TODO:Semantics for BEQ and CMP
 \subsection{Semantics for IMP with function call}
 
@@ -556,7 +560,7 @@ END
 \par The above two interrupt functions are often called in pairs when atomic operation is needed. For instance, an atomic operation context switch should take place when the system call schedule is called, which means the functions $DisableAllInterrupts$ and $EnableAllInterrupts$ are being called in case of performing scheduling. As we know, the $schedule$ system call is often implemented in high level language (i.e., C language) except the operations which need to access registers. Thus the implementation of $schedule$ is in mixed language. We take this system call as an example to demonstrate how our semantics can be applied to verify operating system kernels.
 %����ʱ���жϵı�Ҫ�ԣ����ȳ���������
 \subsection{Verifying the interruption mechanism}
-\par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) kernel, whose formal semantics of system calls have been defined in \cite{}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
+\par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) \cite{osek} kernel, whose formal semantics of system calls have been defined in \cite{xiaoran}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
 \par We integrate our semantics with the semantics defined in \cite{} to apply our semantics on verifying operating systems. since we have only defined semantics for some basic C statements exclude pointers, arrays and some other complex data structures at present, we regard the statement with such data structures as a special statement and define its execution rule in our semantics. The implementation of the OSEK-based system call $schedule()$ is shown in figure \ref{}
 \vspace{11pt}
 \begin{lstlisting}[xleftmargin=1em]
@@ -597,49 +601,41 @@ requires S>=Int 0
 \par In this sections, we discuss some related works in three aspects, i.e. the integrated semantics for mixed language, semantics defined in $\mathbb{K}$ framework and the research on verifying OS kernels.
 \subsection{integrated semantics}
 Several projects have developed integrated semantics for mixed language programs. Schmaltz \cite{Schmaltz} et.al integrate the semantics    macro-assembler and C immediate language. Their work mainly focuses on the function call and function return between two languages but ignores the case when assembler instructions accesses C variables. In the dissertation  \cite{Shadrin} Shadrin also presenting a method to integrate C and assembler together and complete paper-and-pencil
-formal proof of a small hypervisor. Following the work \cite{Shadrin}, Pentchev \cite{Pentchev} adds the semantics for interrupt of operating system kernel to the integrated semantics defined in \cite{Shadrin}. Moreover, the author verifies the interrupt mechanism with a C verifier (i.e., VCC) by abstracting the hardware implementation to C level.
+formal proof of a small hypervisor. Following the work \cite{Shadrin}, Pentchev \cite{Pentchev} adds the semantics for interrupt of operating system kernel to the integrated semantics defined in \cite{Shadrin}.  Moreover, the author verifies the interrupt mechanism with a C verifier (i.e., VCC) \cite{vcc} by abstracting the hardware implementation to C level.
 \par Compared to the above works, the semantics in this paper not only define semantics for function calls and function returns between the two languages but also take global variables, which could be accessed by both assembler and high level language, into account. Furthermore, we implement our semantics in a semantic framework $\mathbb{K}$, which helps us verify programs automatically.
 \subsection{$\mathbb{K}$ semantics}
-\par $\mathbb{K}$ has been deployed to defined semantics for a certain number of languages. C semantics in $\mathbb{K}$ (KCC) is the first complete language semantics defined in $\mathbb{K}$. KCC passed 99.2\% of GCC torture test suit while GCC could only pass 99\% of it. In the process of defining C semantics, some ambiguous and undefined interpretations in C standard were detected, which have been defined in the later work \cite{undefinedkcc}.
+\par $\mathbb{K}$ has been deployed to defined semantics for a certain number of languages. C semantics in $\mathbb{K}$ (KCC) is the first complete language semantics defined in $\mathbb{K}$ \cite{C1}. KCC passed 99.2\% of GCC torture test suit while GCC could only pass 99\% of it. In the process of defining C semantics, some ambiguous and undefined interpretations in C standard were detected, which have been defined in the later work \cite{C2}. Thanks to the analyzability of $\mathbb{K}$, KCC has been commercialized to verify the correctness of C implementations.
 
-$\mathbb{K}$ also provides executable semantics for java \cite{kjava}, javascript, rust, etc. Besides programming
-languages, the $\mathbb{K}$ framework defines formal virtual machines for various software systems, such as KEVM [29] for Ethereum Virtual Machine
-[30] and IELE [31] for blockchain system. In particular, $\mathbb{K}$ has  proven its scalability and effectiveness by defining semantics for system services of operating system kernel and verifying operating system applications.
+$\mathbb{K}$ also provides executable semantics for java \cite{java}, javascript \cite{js}, php \cite{php}, rust \cite{rust}, etc. Besides programming
+languages, the $\mathbb{K}$ framework defines formal virtual machines for various software systems, such as KEVM \cite{KEVM} for Ethereum Virtual Machine \cite{evm} and IELE \cite{KIELE,IELE} for blockchain system. Except for program languages, $\mathbb{K}$ has  proven its scalability and effectiveness by defining semantics for software systems. For instance, \cite{xiaoran} defined semantics for system services of operating system kernel and verifying operating system applications. \cite{orc} deployed $\mathbb{K}$ framework to formally verify the Orc orchestration, which is a concurrent computation model describing the composition and management of web services.
 
 To our best knowledge, the current $\mathbb{K}$ semantics are about single language, while we use $\mathbb{K}$ to bridge the gap between two languages. Furthermore, we demonstrate that $\mathbb{K}$ has the capability of verifying a mixed language program.
 
 \subsection{OS kernel verification}
 Operating system kernel verification has attracted considerable
-attention for a long time. SeL4 is considered as the first fully verified OS kernel. It is verified by the interactive theorem prover
-HOL/Isabelle and the project takes more than 20 person years. Besides, Gu. et al use interactive theorem
-prover Coq to verify the correctness of a concurrent kernel in
-multi-core at assembly level. [50] combines relyguarantee-based
+attention for a long time \cite{zhao}. SeL4 \cite{Sel4} is considered as the first fully verified OS kernel. It is verified by the interactive theorem prover
+HOL/Isabelle \cite{Isabelle} and the project takes more than 20 person years. Besides, Gu. et al \cite{Gu} use interactive theorem
+prover Coq \cite{coq} to verify the correctness of a concurrent kernel in
+multi-core at assembly level. \cite{ucos} combines relyguarantee-based
 simulation with the program logic for reasoning
 about interrupts to verify key modules in the μC/OS-II kernel
 in Coq. All these impressive achievements need construct
-a machine-checkable proof and come with a non-trivial cost. In our work, the mixed language programs could be verified automatically thanks to the Z3-based verifying engine provided by $\mathbb{K}$.
+a machine-checkable proof and come with a non-trivial cost. In our work, the mixed language programs could be verified automatically thanks to the Z3-based \cite{Z3} verifying engine provided by $\mathbb{K}$.
 
-To reduce the verification efforts, automatic OS kernel verification has long been a research objective. \cite{hyperkernel} translates both C and assembler implementations to LLVM and adopts the LLVM verifier to verify the correctness of the OS kernel. \cite{jizheng} abstract the assembler programs to C level and verify the OS kernel with the C verifier. [10] compiles C to assembler and conducts all
-verification at assembly level with Dafny. The verifier deployed by the above works are all based Z3, which is also used by $\mathbb{K}$. Compared with these works, our approach needs no translation of the program. In this case, developers do not need to learn a new language to verify the OS kernel. On the other side, keeping the programs untouched would not affect the readability of the system implementation, which is easier to specify properties for the system.
+To reduce the verification efforts, automatic OS kernel verification has long been a research objective. \cite{hyperkernel} translates both C and assembler implementations to LLVM \cite{llvm} and adopts the LLVM verifier to verify the correctness of the OS kernel. \cite{jizheng} abstract the assembler programs to C level and verify the OS kernel with the C verifier. \cite{Ironclad} compiles C to assembler and conducts all
+verification at assembly level with Dafny \cite{dafny}. The verifier deployed by the above works are all based Z3, which is also used by $\mathbb{K}$. Compared with these works, our approach needs no translation of the program. In this case, developers do not need to learn a new language to verify the OS kernel. On the other side, keeping the programs untouched would not affect the readability of the system implementation, which is easier to specify properties for the system.
 \section{Conclusion and Future Work}
 \par This paper presented an integrated semantics for assembler and a high level language. The integrated semantics not only take function calls and function returns between the two languages into account, but also specified the transaction rules for the cases when a global variable could be accessed by different languages. We adopted an executable semantic framework $\mathbb{K}$ to implement our semantics and verified the correctness of a mixed language program. To demonstrate the effectiveness of our semantics, we applied it to verifying the schedule mechanism of an industrial operating system kernel.
 \par As future work, we are considering to
  apply our semantics in verifying some critical parts of operating system kernels, such as memory allocation and context switch, which are implemented in mixed language. To achieve this goal, we have to complete our semantics for high level language since the implementation of operating system kernel involves many complex data structures, such as pointers and lists. Thanks to the $\mathbb{K}$
 semantics of C, it can be attained by integrating $\mathbb{K}$ semantics for C and our semantics.
-\par Another promising direction we intend to pursue is to verify operating system applications. The basic idea is to specify a rather precise formal semantics for system calls defined in the operating system kernel. \cite{} has defined semantics for system calls of OSEK/VDX operating system kernel. However, they regard s each system call as an atomic statement while
+\par Another promising direction we intend to pursue is to verify operating system applications. The basic idea is to specify a rather precise formal semantics for system calls defined in the operating system kernel. \cite{xiaoran} has defined semantics for system calls of OSEK/VDX operating system kernel. However, they regard s each system call as an atomic statement while
 in practice the execution of a system call be interrupted by the environment or alarms. We are planing to refine their semantics by considering interruptions (i.e., splitting the semantics for system calls at the points where disabling and enabling interrupts are called). In this case, the verification for operating system applications could be more circumspect.
 
-\begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{reference}
 \vspace{12pt}
 \color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+
 
 \end{document}
