@@ -40,7 +40,7 @@
  	backgroundcolor=\color{backcolour},
  	flexiblecolumns=false,
  	%language=C,
- 	basicstyle=\ttfamily\normalsize,
+ 	basicstyle=\ttfamily\small,
  	breaklines=true,
  	extendedchars=true,
  	escapechar=\%,
@@ -55,7 +55,7 @@
  	%morekeywords={*,TASK,EVENT, RESOURCE, ALARM, COUNTER, *,include...}
  	tabsize=4}
  \lstdefinestyle{k}{
-    basicstyle=\normalsize\ttfamily,
+    basicstyle=\small\ttfamily,
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
@@ -71,7 +71,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Formal semantics of mixed language and its application\\
+\title{Towards an automatic verifier for the OS interrupt mechanism\\
 {\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
 should not be used}
 }
@@ -116,7 +116,7 @@ should not be used}
 \maketitle
 
 \begin{abstract}
-Formal methods have been recognized as complementary means to software testing to improve the reliability of systems. Formally analyzing a system or a program requires formal semantics of its implemented language or specification to avoid ambiguous interpretations. To our best knowledge, most of the semantic analysis tools face on monolingual implementations, while some safety-critical systems are implemented in more than one languages (mixed language). For example, most of operating system kernels are implemented in assembler and high level language (e.g., C language). In this paper, we propose an approach to automatically verifying systems implemented in mixed language. We define semantics for the high level language and assembler respectively, and then integrate them together. The integrated semantics is implemented in a rewrite-based executable semantic framework named $\mathbb{K}$, with which we verify a demo loop program implemented by mixed language. Furthermore, we demonstrate the effective of our semantics by adopting it on verifying the schedule mechanism of an industrial automobile operating system kernel.
+Formal methods have been recognized as complementary means to software testing to improve the reliability of systems. Formally analyzing a system or a program requires formal semantics of its implemented language or specification to avoid ambiguous interpretations. To our best knowledge, most of the semantic analysis tools face on monolingual implementations, while some safety-critical systems are implemented in more than one languages (mixed language). For example, most of operating system kernels are implemented in assembler and high level language (e.g., C language). In this paper, we propose an approach to automatically verifying systems implemented in mixed language. We define operational semantics for the high level language and assembler respectively, and then integrate them together. The integrated semantics is implemented in a rewrite-based executable semantic framework named $\mathbb{K}$, with which we verify a demo loop program implemented by mixed language. Furthermore, we demonstrate the effectiveness of our semantics by adopting it on verifying the schedule mechanism of an industrial automobile operating system kernel.
 
 %Formal verification has been recognized as an essential part in improving the correctness and soundness of OS kernels. The verification of OS kernels faces many challenges. For example, the formal proof always comes with difficulties and non-trivial cost. Researchers often have to verify the OS kernel in high level programming languages and ignore low level languages. In this paper, we propose a framework for verifying the whole OS kernel with a low proof burden. We claim it as an end-to-end automated verification framework for the purposes of: (1) verifying the OS kernel that consists of assembler and C languages by formally modeling assembler programs in C level; (2) reasoning the verification with no manual proofs on the basis of SMT. We successfully apply the framework to automatic verifying a commercial operating system $\mu$C/OS-II in different hardware architecture, including all the 74 system calls and the core written in mixed-language (i.e., assembler and C). Our framework helps to catch several overflows and type mismatch vulnerabilities of $\mu$ C/OS-II kernel.
 \end{abstract}
@@ -126,10 +126,10 @@ formal semantics, verification, operating system, $\mathbb{K}$ framework
 \end{IEEEkeywords}
 
 \section{Introduction}
-\par As a complementary approach to testing, formal methods have been prove to be an efficient way to  guarantee the correctness and soundness of software system.
-We adhere that formal analysis of systems or programs should be based on the formal semantics of the implemented language rather than on the informal specification because informal specification may cause ambiguities.
+\par As a complementary approach to testing, formal methods have been proved to be an efficient way to  guarantee the correctness and soundness of software system.
 %引出formal semantics
- Formal methods has the capability to conduct an exhaustive exploration of the software behaviors, which is necessary for ensuring correctness of safety-critical systems such as operating systems and an exhaustive systems.
+ Formal methods has the capability to conduct an exhaustive exploration of the software behaviors, which is necessary for ensuring correctness of safety-critical systems such as operating systems and an exhaustive systems. Formal analysis of systems or programs should be based on the formal semantics of the implemented language rather than on the informal specification because informal specification may cause ambiguities and mislead the developers.
+
 
  There are many challenges on formally verifying operating systems. For example, operating systems are usually implemented in a mix of assembly and high-level language like C. To our best knowledge, there is no formal tools which could verify a system implemented in a mix language. A traditional approach to verifying such a system is to abstracting the assembly part to a high level. However, it is difficult to ensure the soundness of the abstraction. Besides, developers need to abstract a model for every system, which brings some extra effort in formal verification. Another way is to translate high level language to assembly, where a fully verified compiler (or translator) is necessary.
 
@@ -184,16 +184,20 @@ The ARM instruction set provides programmers with a hardware-oriented assembly p
 \begin{displaymath}
 \begin{array}{l l l}
 \hline\\
-word~~\omega \in Int_{32} \\ \\
-Greg~r &::=&~r_0~|~r_1~|~...~|~r_{31} \\ \\
-Sreg~sr &::=&~CPSR~|~SPSR \\ \\
-Addr~a &::=&~\omega~|~[r]~|~[r_i]+[r_j] \\ \\
-r_d~~r_d &::=&~Greg~|~Sreg\\ \\
-r_s~~r_s &::=&~\omega~|~Greg~|~Sreg~|~a \\ \\
-Instr &::=&~STMDB~sp,~rs\\ \\&|&STMIB~sp,~rs\\
-\\&|&~LDMIA~sp,~rs\\
-\\&|&~STR~r_s,~a\\ \\&|&~LDR~r_d,~a\\
-\\&|&~MOV~r_d,~r_s\\ \\&|&ADD~r_d,~r_s,~r_s\\ \\&|&SUB~r_d,~r_s,~r_s\\ \\&|&~ORR~r_d,~r_s,~r_s\\ \\&|&AND~r_d,~r_s,~r_s\\ \\&|&CMP ~r_s,~r_s\\ \\&|&MRS~r_d,~sr\\ \\&|&MSR~sr,~r_d\\ \\&|&~B~Id~\\ \\&|&BL~Id\\ \\&|&BEQ~Id \\ \\
+word~~\omega \in Int_{32} \\
+Greg~~r ::=~r_0~|~r_1~|~...~|~r_{31} \\
+Sreg~sr ::=~CPSR~|~SPSR \\
+Addr~~a ::=~\omega~|~[r]~|~[r_i]+[r_j] \\
+r_d~~~~~r_d ::=~Greg~|~Sreg\\
+r_s~~~~~r_s ::=~\omega~|~Greg~|~Sreg~|~a \\
+~~~~Instr ::=~STMDB~sp,~rs ~~~|~STMIB~sp,~rs\\
+~~~~~~~~~~~~~|~~LDMIA~sp,~rs~~~~&|&~STR~r_s,~a\\
+~~~~~~~~~~~~~|~~LDR~r_d,~a~~~~~~~~~ |~MOV~r_d,~r_s\\
+~~~~~~~~~~~~~|~~ADD~r_d,~r_s,~r_s~~~~ |~SUB~r_d,~r_s,~r_s\\
+~~~~~~~~~~~~~|~~ORR~r_d,~r_s,~r_s~~~~ |~AND~r_d,~r_s,~r_s\\
+~~~~~~~~~~~~~|~~CMP ~r_s,~r_s~~~~~~~ |~MRS~r_d,~sr\\
+~~~~~~~~~~~~~|~~MSR~sr,~r_d~~~~~~ |~B~Id~\\
+~~~~~~~~~~~~~|~~BL~Id~~~~~~~~~~~~~ |~BEQ~Id \\ \\
 \hline
 
 \end{array}
@@ -201,9 +205,9 @@ Instr &::=&~STMDB~sp,~rs\\ \\&|&STMIB~sp,~rs\\
 \caption{The syntax of the ARM assembly language}
 \label{arm-syntax}
 \end{figure}
-\par Figure \ref{arm-syntax} shows the syntax of the ARM assembly language. Here we only give some typical instructions that are frequently used in OS implementations. $STMDB$ pushes the value of registers $rs$ into the stack. The expression $sp$ is the stack pointer, whose value is often stored in the register with index 13. $rs$ is the register list. The instruction $STMIB$ is to increase the value of stack pointer and then store the values of registers $rs$ into the stack. $LDMIA$ loads the value of the stack into the registers and then decreases the value of the stack pointer. The instructions $STR$ and $LDR$ are to load the value from memory with address $a$ to a register $r_s$ and store the value of register $r_s$ to the memory address $a$. The instruction $MOV~r_d,~r_s$ is to move the value of register $r_s$ to the destination register $r_d$. $ADD$ ($SUB$) adds (subtracts) the value of two source operand and store the result to the destination operand. Similarly, $ORR$ and $AND$ are two opcodes which compute the logical or and logical and result of the two source registers and store the result to the destination register. Except for operating on general purpose register, there are some instructions that operate on status registers. For instance, $MRS$ and $MSR$ are two opcodes read value from status register to general purpose register and read value from general purpose register to the status register respectively. $B$ and $BL$ are to jump a specific address to execute the instructions. The difference is that the opcode $BL$ should save its current program counter so that it could return after executing the called program.\\
-
-$\textbf{Configuration.}$The configuration of ARM assembler consists of ARM instruction set, a byte-addressable memory $Mem:~N\mapsto B^8$ (where $N$ is the natural number and $B\equiv \{0,~1\}$), two registers, i.e. general purpose register $GReg::\textit{R}\mapsto B^8$ and status register $SReg::\textit{R}\mapsto B^8$ (\textit{R} is the register index and $B^8$ is the register value), and a data stack.\\ \\
+\par Figure \ref{arm-syntax} shows the syntax of the ARM assembly language. Here we only give some typical instructions that are frequently used in OS implementations. $STMDB$ pushes the value of registers $rs$ into the stack. The expression $sp$ is the stack pointer, whose value is often stored in the register with index 13. $rs$ is the register list. The instruction $STMIB$ is to increase the value of stack pointer and then store the values of registers $rs$ into the stack. $LDMIA$ loads the value of the stack into the registers and then decreases the value of the stack pointer. The instructions $STR$ and $LDR$ are to load the value from memory with address $a$ to a register $r_s$ and store the value of register $r_s$ to the memory address $a$. The instruction $MOV~r_d,~r_s$ is to move the value of register $r_s$ to the destination register $r_d$. $ADD$ ($SUB$) adds (subtracts) the value of two source operand and store the result to the destination operand. Similarly, $ORR$ and $AND$ are two opcodes which compute the logical or and logical and result of the two source registers and store the result to the destination register. Except for operating on general purpose register, there are some instructions that operate on status registers. For instance, $MRS$ and $MSR$ are two opcodes read value from status register to general purpose register and read value from general purpose register to the status register respectively. $B$ and $BL$ are to jump a specific address to execute the instructions. The difference is that the opcode $BL$ should save its current program counter so that it could return after executing the called program.
+\par We define the operational semantics for the instructions listed in Figure \ref{arm-syntax}. The operational semantics specify how the effects of an instruction is produced. We firstly introduce the configuration that is used to describe the state of the assembly system, afterwards list the transition rule for all the instructions.
+\par $\textbf{Configuration.} $The configuration of ARM assembler consists of ARM instruction set, a byte-addressable memory $Mem:~N\mapsto B^8$ (where $N$ is the natural number and $B\equiv \{0,~1\}$), two registers, i.e. general purpose register $GReg::\textit{R}\mapsto B^8$ and status register $SReg::\textit{R}\mapsto B^8$ (\textit{R} is the register index and $B^8$ is the register value), and a data stack.\\ \\
 $Con_{asm}$=($Pro_{asm}::Instr,\\~~~~~~~~~~~~Mem::N\mapsto B^8,\\~~~~~~~~~~~~GReg::\textit{R}\mapsto B^8,\\~~~~~~~~~~~~SReg::\textit{R}\mapsto B^8,\\~~~~~~~~~~~~Stack::List$)\\
 
 
@@ -227,39 +231,78 @@ $Con_{asm}$=($Pro_{asm}::Instr,\\~~~~~~~~~~~~Mem::N\mapsto B^8,\\~~~~~~~~~~~~GRe
 %$\frac{next(C.Instr)=MSR~CPSR,~R_i~~valid(R_i)=true}{Reg(CPSR):=Reg(R_i)}$\\ \\
 %$\frac{next(C.Instr)=BL~l}{set(Instr_{next}(Program),~l);~Reg(R_{14}):=C.Program}$\\ \\
 %$\frac{next(C.Instr)=B~l}{set(Instr_{next}(Program),~l)}$
+\begin{table*}
+\renewcommand\arraystretch{1.5}
+\centering
+\caption{Semantics for ARM instructions}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{Instruction} & \textbf{Semantics} \\
+  \hline
+  \hline
+  LDR & $<(\textbf{LDR}~R_i,~N),~Mem,~GReg,~SReg,~Stack>~~~~~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,~Stack>$\\
+  STR & $<(\textbf{STR} ~R_i,~A_i),~Mem,~GReg,~SReg,~Stack>~~~~~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem[value(R_i)/value(A_i)],~GReg,~SReg,~Stack>$ \\
+  STMDB & $<(\textbf{STMDB} ~sp,~N),~Mem,~GReg,~SReg,~Stack>~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg,~SReg,~[N\cdot Stack/Stack]>$ \\
+  STMIB & $<(\textbf{STMIB} ~R_i,~\{R_j-R_n\}),~Mem,~GReg,~SReg,~Stack>~\rightarrow
+~<STMIB~[R_i]+4,~\{R_{j+1}-R_n\},Mem[value(R_j)/value(R_i)],~~GReg,~SReg,~Stack>$ \\
+  LDMIA & $<(\textbf{LDMIA} ~sp,~R_i),~Mem,~GReg,~SReg,~Stack>~~~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,~~[N\cdot StackList/StackList]>$ \\
+  ADD & $<(\textbf{ADD}~R_i,~R_{j1},~R_{j2}),~Mem,~GReg,~SReg,~Stack>~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg[(value(R_{j1})+value(R_{j2}))/value(R_i)],~~SReg,~Stack>$ \\
+  CMP & $<(\textbf{CMP}~R_i,~R_{j},~Mem,~GReg,~SReg,~Stack>~~~~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg,~SReg[value(flag)/(value(R_i)==value(R_j))],~stack>$\\
+  MRS & $<(\textbf{MRS}~R_i,~CPSR),~Mem,~GReg,~SReg,~Stack>~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg[value(CPSR)/value(R_i)],~SReg,~Stack>$ \\
+  MSR & $<(\textbf{MSR}~CPSR,~R_i),~Mem,~GReg,~SReg,~Stack>~~~~~~\rightarrow
+~<\varepsilon,~Mem,~GReg,~SReg[value(R_i)/value(CPSR)],~Stack>$ \\
+  BL  & $<(\textbf{BL}~X,~Mem,~GReg,~SReg,~Stack,~fun>~~~~~~~~~~~~~\rightarrow
+~<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$ \\
+  BEQ$_1$ & $<(\textbf{BEQ}~X,~Mem,~GReg,~SReg,~Stack,~fun>~~~~~~~~~~~\rightarrow
+  ~<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>~~if~value(flag)==1$ \\
+  BEQ$_2$ & $<(\textbf{BEQ}~X,~Mem,~GReg,~SReg,~Stack,~fun>~~~~~~~~~~~\rightarrow
+  ~<\varepsilon,~Mem,~GReg,~SReg,~Stack,~fun>~~if~value(flag)==0$ \\
+  \hline
+\end{tabular}
+\label{arm}
+\end{table*}
 For a better understanding of our semantics, we introduce some helper functions firstly. The function $value$ is to read the value from a specific register or memory address.
-\par The instruction \textbf{LDR} loads a value $N$ to a register $R_i$. Executing the instruction $\textbf{LDR}~R_i,~N$ could change the state of general purpose register, i.e., replace the value of register $R_i$ with $N$. After executing this instruction, the program component in the configuration becomes $\varepsilon$ and waiting for the next instruction.\\ \\
-$<(\textbf{LDR}~R_i,~N),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,~Stack>$\\
- \par The instruction \textbf{STR} stores the value of register $R_i$ to the memory address $A_i$. The execution of instruction $STR$ changes the state of memory, i.e., replaces the data stored in the memory with address $A_i$ with the value of register $R_i$. Similar with $LDR$, finishing executing this instructions means the program component becomes $\varepsilon$.\\ \\
-$<(\textbf{STR} ~R_i,~A_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem[value(R_i)/value(A_i)],~GReg,~SReg,~Stack>\\ \\$
-\par \textbf{STMDB} reads values from general purpose registers and push the value into stack. In practice the stack pointer is the general purpose register with index of 13. For a clear understanding, our semantics regards the stack as an independent component. The execution of instruction \textbf{STMDB} pushes the integer $N$ into the stack.\\ \\
-$<(\textbf{STMDB} ~sp,~N),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg,~SReg,~[N\cdot Stack/Stack]>\\ \\$
-\par \textbf{STMIB} reads values from a list of registers and store them into the memory. The first memory address is the value of $R_i$.  We regard its execution as non-atomoic. After one step of execution, this instruction is reduced to $STMIB~[R_i]+4,~\{R_{j+1}-R_n\}$, where $[R_i]+4$ means the start address has been changed. And since the value of $R_j$ has been stored, the next value to be read is that of register $R_{j+1}$. Executing one step of this instruction replaces the value of address $value(R_i)$ in the memory with value of register $R_i$.\\ \\
-$<(\textbf{STMIB} ~R_i,~\{R_j-R_n\}),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<STMIB~[R_i]+4,~\{R_{j+1}-R_n\},Mem[value(R_j)/value(R_i)],\\~~GReg,~SReg,~Stack>\\ \\$
-\par The instruction \textbf{LDMIA} pops the value from the stack and moves the value to the specific register. The execution of this instruction triggers state transitions of two configuration components, i.e., taking out the first value $N$ of the stack and replacing the value of register $R_i$ with $N$.  \\ \\
-$<(\textbf{LDMIA} ~sp,~R_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,\\~~[N\cdot StackList/StackList]>\\ \\$
-\par $ADD$ is a kind of arithmetic operator which adds the value of its two source operands and store the result in the destination register. As shown in the formula below, the execution of instruction $ADD$ changes the state of the general purpose register, i.e., replace the value of $R_i$ with the addition result of two source registers.\\ \\
-$<(\textbf{ADD}~R_i,~R_{j1},~R_{j2}),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg[(value(R_{j1})+value(R_{j2}))/value(R_i)],\\~~SReg,~Stack>$\\ \\
-\par $MRS$ is shorted for move to register from state register. It is used to operate on status registers. In another words, it replace the value of the destination register with that of CPSR, which stores the current program state. \\ \\
-$<(\textbf{MRS}~R_i,~CPSR),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg[value(CPSR)/value(R_i)],~SReg,~Stack>$\\ \\
-\par $MSR$ is shorted for move to state register from register. Same with $MRS$, it also operates on status registers by it replace the value of the CPSR with that of the source register.\\ \\
-$<(\textbf{MSR}~CPSR,~R_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~GReg,~SReg[value(R_i)/value(CPSR)],~Stack>$\\ \\
-\par The instruction $BL$ jumps directly to a location indicated by the target label X if the target location is within the current procedure body. To integrate with C semantics, we get rid of the program counter in the ARM semantics. Instead, we regard a fragment separated by a label as a procedure, and jumping to a label is considered as a procedure call. Thus executing one step of this instruction is reduced to execute the function body with function name $X$. We omit the semantics for instruction $B$ here because they are definitely same.  \\ \\
-$<(\textbf{BL}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
-$<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$\\ \\
+\par The instruction $LDR$ loads a value $N$ to a register $R_i$. Executing the instruction $LDR~R_i,~N$ could change the state of general purpose register, i.e., replace the value of register $R_i$ with $N$. After executing this instruction, the program component in the configuration becomes $\varepsilon$ and waiting for the next instruction.
+%$<(\textbf{LDR}~R_i,~N),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,~Stack>$\\
+ \par The instruction $STR$ stores the value of register $R_i$ to the memory address $A_i$. The execution of instruction $STR$ changes the state of memory, i.e., replaces the data stored in the memory with address $A_i$ with the value of register $R_i$. Similar with $LDR$, finishing executing this instructions means the program component becomes $\varepsilon$.
+%$<(\textbf{STR} ~R_i,~A_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem[value(R_i)/value(A_i)],~GReg,~SReg,~Stack>\\ \\$
+\par $STMDB$ reads values from general purpose registers and push the value into stack. In practice the stack pointer is the general purpose register with index of 13. For a clear understanding, our semantics regards the stack as an independent component. The execution of instruction $STMDB$ pushes the integer $N$ into the stack.
+%$<(\textbf{STMDB} ~sp,~N),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg,~SReg,~[N\cdot Stack/Stack]>\\ \\$
+\par $STMIB$ reads values from a list of registers and store them into the memory. The first memory address is the value of $R_i$.  We regard its execution as non-atomoic. After one step of execution, this instruction is reduced to $STMIB~[R_i]+4,~\{R_{j+1}-R_n\}$, where $[R_i]+4$ means the start address has been changed. And since the value of $R_j$ has been stored, the next value to be read is that of register $R_{j+1}$. Executing one step of this instruction replaces the value of address $value(R_i)$ in the memory with value of register $R_i$.
+%$<(\textbf{STMIB} ~R_i,~\{R_j-R_n\}),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<STMIB~[R_i]+4,~\{R_{j+1}-R_n\},Mem[value(R_j)/value(R_i)],\\~~GReg,~SReg,~Stack>\\ \\$
+\par The instruction $LDMIA$ pops the value from the stack and moves the value to the specific register. The execution of this instruction triggers state transitions of two configuration components, i.e., taking out the first value $N$ of the stack and replacing the value of register $R_i$ with $N$.
+%$<(\textbf{LDMIA} ~sp,~R_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg[N/value(R_i)],~SReg,\\~~[N\cdot StackList/StackList]>\\ \\$
+\par $ADD$ is a kind of arithmetic operator which adds the value of its two source operands and store the result in the destination register. As shown in the formula below, the execution of instruction $ADD$ changes the state of the general purpose register, i.e., replace the value of $R_i$ with the addition result of two source registers.
+\par $CMP$ is a logical operator which compares the values of its two source operands. If the their values are same, the flag bit of status register would be set with 1, otherwise 0 would be assigned to the flag bit of status register.
+%$<(\textbf{ADD}~R_i,~R_{j1},~R_{j2}),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg[(value(R_{j1})+value(R_{j2}))/value(R_i)],\\~~SReg,~Stack>$\\ \\
+\par $MRS$ is shorted for move to register from state register. It is used to operate on status registers. In another words, it replace the value of the destination register with that of CPSR, which stores the current program state.
+%$<(\textbf{MRS}~R_i,~CPSR),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg[value(CPSR)/value(R_i)],~SReg,~Stack>$\\ \\
+\par $MSR$ is shorted for move to state register from register. Same with $MRS$, it also operates on status registers by it replace the value of the CPSR with that of the source register.
+%$<(\textbf{MSR}~CPSR,~R_i),~Mem,~GReg,~SReg,~Stack>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~GReg,~SReg[value(R_i)/value(CPSR)],~Stack>$\\ \\
+\par The instruction $BL$ jumps directly to a location indicated by the target label X if the target location is within the current procedure body. To integrate with C semantics, we get rid of the program counter in the ARM semantics. Instead, we regard a fragment separated by a label as a procedure, and jumping to a label is considered as a procedure call. Thus executing one step of this instruction is reduced to execute the function body with function name $X$. We omit the semantics for instruction $B$ here because they are definitely same.
+%$<(\textbf{BL}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
+%$<\pi_{2}.fun(X),~Mem,~GReg,~SReg,~Stack,~fun>$\\ \\
 
-\par The instruction $BEQ$ often follows some logical instructions, such as $CMP$. In case the \\\\
-$<(\textbf{BEQ}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
+\par The instruction $BEQ$ often follows some logical instructions, such as $CMP$. In case the flag bit of status instruction has been set with the value 1, the $BEQ$ instruction has the same execution rule with $BL$, i.e., to call function $X$ to execute. If the value flag bit is 0, the $BEQ$ does nothing but just skip.\\\\
+%$<(\textbf{BEQ}~X,~Mem,~GReg,~SReg,~Stack,~fun>~\rightarrow\\ \\$
 
-TODO:Semantics for BEQ and CMP
+%TODO:Semantics for BEQ and CMP
 \subsection{Semantics for IMP with function call}
 
 \par  The syntax of C is presented in BNF form. $e$ is defined as expressions, including arithmetic expression and boolean expression. It is clear that the symbols $e_1$ and $e_2$ are being used to stand for any arithmetic expression. In our presentation of syntax we use such metavariables to range over the syntactic sets-the metavariables $e_1$ and $e_2$ above are understood to range over the set of arithmetic expressions.  The symbol ``::=" should be read as ``can be" and the symbol ``$|$" as ``or". Thus as arithmetic expression $e$ can be an integer or an identifier, or (arithmetic or boolean) expression. As for the statements, we are concerning some basic statements, such as assignment statement, condition statement, loop statement and statements related to function call and function return.
@@ -268,9 +311,9 @@ TODO:Semantics for BEQ and CMP
 \small
 \begin{array}{l l l}
 \hline\\
-stmt &::=&~Id=e ~\\ \\&|& \texttt{if}~e_1~e_2~\texttt{else}~e_3\\ \\& |& \texttt{while}~e_1~e_2 \\ \\&|& FunctionCall \\ \\&|& \texttt{return}~e \\\\
-e &::=&Int\\ \\&|&~Id\\ \\&|&~e_1*e_2\\ \\&|&e_1+e_2\\ \\&|&~e_1\leq e_2\\ \\&|&~!e~\\ \\&|&~e_1\land e_2\\\\
-FunctionCall&::=&Id(e)\\\\
+stmt ::=~Id=e ~|~ \texttt{if}~e_1~e_2~\texttt{else}~e_3 ~ |~ \texttt{while}~e_1~e_2 ~|~ FunctionCall ~|~ \texttt{return}~e \\
+e ::=Int~|~Id~|~e_1*e_2~|~e_1+e_2~|~e_1\leq e_2~|~!e~|~e_1\land e_2\\
+FunctionCall::=~Id(e)\\\\
 
 \hline
 
@@ -279,12 +322,43 @@ FunctionCall&::=&Id(e)\\\\
 \caption{The syntax of IMP with function call}
 \label{IMP-syntax}
 \end{figure}
-
+\par With the syntax of IMP with function call, we define the transition rules for each statement to specify how the state changes caused by the execution of each statement. Similarly, the configuration should be defined firstly to describe the state of this language.
 \par $\textbf{Configuration.}$ An IMP with procedure call configuration is shown in the below, which consists of a global, byte-addressable memory $Mem::N\mapsto B$, an environment $Env::Id\mapsto N$, a function frame stores the defined functions and a function stack to store context when function call occurs. \\ \\
 
-$configuration=(Pro_c::Stmts,~Mem::N\mapsto B,~Env::Id\mapsto N,~Fun::Id\mapsto (Paras,~stmts),~FStack::List)$\\ \\
+$Con_c=(Pro_c::Stmts,~Mem::N\mapsto B,~Env::Id\mapsto N,~Fun::Id\mapsto (Paras,~stmts),~FStack::List)$\\ \\
 
-\textbf{Semantics.}
+%\textbf{Semantics.}
+\begin{table*}
+\caption{Semantics for IMP with Function Call}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  statements & semantics \\
+  \hline
+  \hline
+  arithmetic & $<e_1~*~e_2,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~~~~~\rightarrow
+~<Mem(Env(e_1))*Mem(Env(e_2)),~Mem,~Env,~Fun,~Fstack>$\\
+  look up & $<X:Id,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~~~~~~~~\rightarrow
+~<Mem(Env(X)),~Mem,~Env,~Fun,~Fstack>$ \\
+  assignment & $<X=n,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem[n/Mem(Env(X))],~Env,~Fun,~Fstack>$ \\
+  condition$_1$ & $<if~e_1~then~e_2~else~e_3,~Mem,~Env,~Fun,~Fstack>~\rightarrow
+~<e_2,~Mem,~Env,~Fun,~Fstack>~~~~if~Mem(Env(e_1))==true$\\
+  condition$_2$ & $<if~e_1~then~e_2~else~e_3,~Mem,~Env,~Fun,~Fstack>~\rightarrow
+~<e_3,~Mem,~Env,~Fun,~Fstack>~~~~if~Mem(Env(e_1))==false$\\
+  loop$_1$ & $<while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~\rightarrow
+~<e_2;~while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>~~~~if~Mem(Env(e_1))==true$ \\
+  loop$_2$ & $<while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~\rightarrow
+~<\varepsilon,~Mem,~Env,~Fun,~Fstack>~~~~if~Mem(Env(e_1))==false$\\
+  function call & $<e(E),~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~~~~~~~~~\rightarrow
+~<\pi_{2}.fun(X)[E/\pi_1.Fun(e)],~Mem,~\varepsilon,~Fun,~[(C.Pro_c,~Env)\cdot Fstack)/Fstack]>$ \\
+  function return & $<return~e,~Mem,~Env,~Fun,~Fstack>~~~~~~~~~~~~~~~\rightarrow
+~<Mem(Env(e))\circ s_1,~Mem,~Env_1,~Fun,~[stackList/(S_1,~Env_1)\cdot stackList]>$\\
+  \hline
+\end{tabular}
+\label{IMP}
+\end{table*}
+
 %$\frac{next(C.Stmt)=e_1*e_2~~c(e_1)=n_1~~c(e_2)=n_2}{}$ \\ \\
 %$\frac{next(C.Stmt)=I=e_1~~c(e_1)=n}{Mem(I):=n}$ \\ \\
 %$\frac{next(C.Stmt)=if~e_1~e_2~else~e_3~~c(e_1)=true}{next(C.Stmt):=e_2}$ \\ \\
@@ -292,42 +366,27 @@ $configuration=(Pro_c::Stmts,~Mem::N\mapsto B,~Env::Id\mapsto N,~Fun::Id\mapsto 
 %$\frac{next(C.Stmt)=while~e_1~e_2~~c(e_1)=true}{next(C.Stmt):=e_2}$ \\ \\
 %$\frac{next(C.Stmt)=e(E)~~isFunction(e)=true~~fun(e)=(P,S)}{assign(E, ~P);~C.Stmt:=stmts;~push(stmt,~fstack)}$ \\ \\
 %$\frac{next(C.Stmt)=return~e}{C.Stmt:=e\circ pop(fstack)}$
-we present the situation of expression $e_1~*~e_2$ waiting to be evaluated in the current state. To evaluate this expression, we should first get the values of $e_1$ and $e_2$ respectively. We assume both of those two expressions are identifier and the value can be presented as $Mem(Env(e_1))$.  \\ \\
-$<e_1~*~e_2,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<Mem(Env(e_1))*Mem(Env(e_2)),~Mem,~Env,~Fun,~Fstack>$\\ \\
-\par To get the value of an identifier $X$, we should firstly look up the address of $X$ by the function $Env(X)$, and then read the number store in address $Env(X)$ by the function $Mem(Env(X))$. \\ \\
-$<X:Id,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<Mem(Env(X)),~Mem,~Env,~Fun,~Fstack>$\\ \\
+
+
+
+we present the situation of expression $e_1~*~e_2$ waiting to be evaluated in the current state. To evaluate this expression, we should first get the values of $e_1$ and $e_2$ respectively. We assume both of those two expressions are identifier and the value can be presented as $Mem(Env(e_1))$.
+\par To get the value of an identifier $X$, we should firstly look up the address of $X$ by the function $Env(X)$, and then read the number store in address $Env(X)$ by the function $Mem(Env(X))$.
 \par As an effect of such a statement execution the evaluated right hand
 expression of this statement is stored in the memory of the IMP with procedure call configuration at
-address that is the evaluated left hand side expression of this statement. \\ \\
-$<X=n,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem[n/Mem(Env(X))],~Env,~Fun,~Fstack>$\\ \\
+address that is the evaluated left hand side expression of this statement.
 \par This statement performs a so-called conditional jump to the target expression. There are two cases for this expression: (i) if the evaluated logical test expression $e_1$
 of the statement is equal zero, then it jumps $e_2$ to execute. (ii) in case the evaluated test expression e fails, i.e. it is not equal zero, then the
-execution of such a statement jumps to $e_3$ to execute.\\ \\
-(i)$<if~e_1~then~e_2~else~e_3,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<e_2,~Mem,~Env,~Fun,~Fstack>$\\ \\$~~if~Mem(Env(e_1))==true$\\ \\
-(ii)$<if~e_1~then~e_2~else~e_3,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<e_3,~Mem,~Env,~Fun,~Fstack>$\\ \\$~~if~Mem(Env(e_1))==false$\\ \\
-\par The loop statement also could result in jumping to a target expression with conditions. If the boolean expression is evaluated as true, the loop expression jumps to $e_2$ to execute followed with the loop expression. In another case, if the boolean expression $e_1$ is evaluated as false, the loop expression does nothing.\\ \\
-(i)$<while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<e_2;~while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>$\\ \\$~~if~Mem(Env(e_1))==true$\\ \\
-(ii)$<while~e_1~e_2,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~Env,~Fun,~Fstack>$\\ \\$~~if~Mem(Env(e_1))==false$\\ \\
+execution of such a statement jumps to $e_3$ to execute.
+\par The loop statement also could result in jumping to a target expression with conditions. If the boolean expression is evaluated as true, the loop expression jumps to $e_2$ to execute followed with the loop expression. In another case, if the boolean expression $e_1$ is evaluated as false, the loop expression does nothing.
 \par A function call statement is treated here if it is not external and it either is a function or
 procedure call. The function to be called is $e$ with parameters $E$. we should read the function body and its argument from the component $fun$ to execute. As a result of the
 call statement execution a new stack frame is created and is put on the top of the stack. So
 that, the execution will resume at the next statement after the call statement whenever
-the called function(procedure) returns. \\ \\
-$<e(E),~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<\pi_{2}.fun(X)[E/\pi_1.Fun(e)],~Mem,~\varepsilon,~Fun,\\ \\~~~[(C.Pro_c,~Env)\cdot Fstack)/Fstack]>$\\ \\
+the called function(procedure) returns.
 \par There are two return statements: (i) return from a function call, i.e. return
 with result, and (ii) return from a procedure call, i.e. return without result. In the first
 case the evaluated result expression of the return statement is stored in the memory
-at the address identified by the return destination component. For both statements the top stack frame in the configuration is removed. \\ \\
-$<return~e,~Mem,~Env,~Fun,~Fstack>~\rightarrow\\ \\$
-$<Mem(Env(e))\circ s_1,~Mem,~Env_1,~Fun,\\ \\~~~[stackList/(S_1,~Env_1)\cdot stackList]>$\\ \\
+at the address identified by the return destination component. For both statements the top stack frame in the configuration is removed.
 %\subsection{auxiliary function}
 %\begin{itemize}
 %	\item valid: $\mathbb{N}$ $\rightarrow$ Boolean\\
@@ -353,9 +412,6 @@ $<Mem(Env(e))\circ s_1,~Mem,~Env_1,~Fun,\\ \\~~~[stackList/(S_1,~Env_1)\cdot sta
 \subsection{Semantics of the Integrated language}
 \par In order to obtain an integrated model of IMP with procedure call and assembly language, there are two things left to
 do: define how we model the state of the combined semantics and define transitions.
-\par The program component of integrated language is simply a record consisting of an IMP with procedure call program and assembly program. Another observation that can be made is that in both
-semantics we use the same byte-addressable memory, which can be shared. In order to eliminate redundancy, we introduce the notion of execution context for IMP and assembly in the integrated semantics.  A context is a configuration of the corresponding language
-where the program and memory component (Pro and Mem) are removed. Each context is a snapshot and can be expressed by a triple. We select the components of a snapshot using the projections, where $\pi_n$ is to get the $n^{th}$ element of the snapshot.\\ \\
 $\textbf{Configuration}$\\ \\
 C=$(Pro_{asm}\cup Pro_c,~Mem,~Con_{asm},~Con_{c})$\\ \\
 $Con_{asm}=(Greg,~Sreg,~stack)$\\ \\
@@ -363,34 +419,70 @@ $Con_c=(env,~Fstack,~Fun)$\\ \\
 $\pi_1.con_{asm}=_{df}Greg~~~~~~~~~~~~~~~~~\pi_1.con_c=_{df}env$\\\\
 $\pi_2.con_{asm}=_{df}Sreg~~~~~~~~~~~~~~~~~\pi_2.con_c=_{df}fstack$\\\\
 $\pi_3.con_{asm}=_{df}stack~~~~~~~~~~~~~~~~\pi_3.con_c=_{df}fun$\\ \\
+\par The program component of integrated language is simply a record consisting of an IMP with procedure call program and assembly program. Another observation that can be made is that in both
+semantics we use the same byte-addressable memory, which can be shared. In order to eliminate redundancy, we introduce the notion of execution context for IMP and assembly in the integrated semantics.  A context is a configuration of the corresponding language
+where the program and memory component (Pro and Mem) are removed. Each context is a snapshot and can be expressed by a triple. We select the components of a snapshot using the projections, where $\pi_n$ is to get the $n^{th}$ element of the snapshot.\\ \\
 
-\textbf{Semantics.}
+
  For an external call from IMP to assembly, the context of assembly should be updated according to the calling convention, i.e., passing the parameter values to the first four registers in case the amount of parameters is not greater than four. The currently
-active IMP context is retired to the list of inactive contexts. And the body of function $e$ is taken out to exexute.\\ \\
-$<Pro_c=e(E),~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<\pi_2.\pi_3.con_c(e)[E/value\{R_0-R_3\}],~Mem,~Con_{asm},\\ \\~~Con_c[(next.Pro_c,~\pi_1.Con_c)\cdot \pi_2.Con_c/\pi_2.Con_c,~\varepsilon/\pi_1.Con_c]>$\\ \\
-$if~|E|\leq 3 \\ \\$
+active IMP context is retired to the list of inactive contexts. And the body of function $e$ is taken out to exexute.
+%$<Pro_c=e(E),~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<\pi_2.\pi_3.con_c(e)[E/value\{R_0-R_3\}],~Mem,~Con_{asm},\\ \\~~Con_c[(next.Pro_c,~\pi_1.Con_c)\cdot \pi_2.Con_c/\pi_2.Con_c,~\varepsilon/\pi_1.Con_c]>$\\ \\
+%$if~|E|\leq 3 \\ \\$
 \par For a call from assembly to IMP programs, we should assign values to the parameters of IMP functions firstly. The first four parameters are taken from registers, we convert their values to C-IL-values
 of the type expected by the function. The remaining parameters are passed on the stack
-(lifo) in right-to-left order. Then we take out the function body of function $e$ from the $fun$ component, which is the third element of IMP context, to execute.\\ \\
-$<Pro_{asm}=B~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],\\ \\~~Mem,~Con_{asm},~Con_c>~\\ \\$$if~|\pi_1.\pi_3.Con_c(e)|\leq 3\\ \\$
-\par $BL$ is another instruction that can call IMP functions from assembler. The difference with instruction $B$ is $BL$ is to call functions with return. That is to say before calling functions, the execution context of assembly program should be stored and it will be restored after executing function $e$. The state transition is exactly same with that of instruction $B$, we omit its explanation here. \\ \\
-$<Pro_{asm}=BL~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],\\ \\~~Mem,~Con_{asm},~Con_c>~\\ \\$$if~|\pi_1.\pi_3.Con_c(e)|\leq 3\\ \\$
+(lifo) in right-to-left order. Then we take out the function body of function $e$ from the $fun$ component, which is the third element of IMP context, to execute.
+%$<Pro_{asm}=B~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],\\ \\~~Mem,~Con_{asm},~Con_c>~\\ \\$$if~|\pi_1.\pi_3.Con_c(e)|\leq 3\\ \\$
+\par $BL$ is another instruction that can call IMP functions from assembler. The difference with instruction $B$ is $BL$ is to call functions with return. That is to say before calling functions, the execution context of assembly program should be stored and it will be restored after executing function $e$. The state transition is exactly same with that of instruction $B$, we omit its explanation here.
+%$<Pro_{asm}=BL~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],\\ \\~~Mem,~Con_{asm},~Con_c>~\\ \\$$if~|\pi_1.\pi_3.Con_c(e)|\leq 3\\ \\$
 \par The return statement performs an interlanguage
 return such that the IMP execution context that has created the current active
 assembly context becomes active again. This is done by substituting the current active
 assembly context with the IMP execution context found on the top of inactive execution
-contexts.\\ \\
-$<Pro_c=return~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<\varepsilon,~Mem,~Con_{asm}[\pi_1.Con_{asm}[e/R_0]/\pi_1.Con_{asm}],~Con_c>$\\ \\
-\par This case is complementary to the previous one. If an assembly function returns to IMP, the execution context of IMP stored in the function stack should be taken out. That is to say, to restore the IMP statements $stmt$ to the program component and the $env$ to the environment component.  \\ \\
-$<Pro_{asm}=END,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<stmt_1,~Mem,~Con_{asm},~env_1/\pi_1.Con_c],\\ \\~~Con_c[\pi_2.Con_c'/((stmt_1,~env_1)\cdot \pi_2.Con_c')>\\ \\$
+contexts.
+%$<Pro_c=return~e,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<\varepsilon,~Mem,~Con_{asm}[\pi_1.Con_{asm}[e/R_0]/\pi_1.Con_{asm}],~Con_c>$\\ \\
+\par This case is complementary to the previous one. If an assembly function returns to IMP, the execution context of IMP stored in the function stack should be taken out. That is to say, to restore the IMP statements $stmt$ to the program component and the $env$ to the environment component.
+%$<Pro_{asm}=END,~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<stmt_1,~Mem,~Con_{asm},~env_1/\pi_1.Con_c],\\ \\~~Con_c[\pi_2.Con_c'/((stmt_1,~env_1)\cdot \pi_2.Con_c')>\\ \\$
 \par Except for function calls, the assembler programs and IMP programs can interactive by accessing C variables. There are two cases where assembler programs accesses IMP variables: (i) read the address or the value of IMP variables; (ii) take the IMP variables as an operand of assembly instructions. In the second case, we obtain the value of the variable firstly and take the integer as one of the operands to execute the instruction.\\ \\
-$<Pro_{asm}=(OP~R_i,~R_j,~A_i),~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
-$<(OP~R_i,~R_j,~Mem(A_i)),~Mem,~Con_{asm},~Con_c>$\\ \\
+%\textbf{Semantics.}
+\begin{table*}
+\caption{Semantics for Integrated Language}
+\renewcommand\arraystretch{1.5}
+\begin{tabular}{|l|l|}
+  \hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  \textbf{statements} & \textbf{semantics} \\
+  \hline
+  \hline
+  function call (C)& $<Pro_c=e(E),~Mem,~Con_{asm},~Con_c>~\rightarrow$\\
+
+&$<\pi_2.\pi_3.con_c(e)[E/value\{R_0-R_3\}],~Mem,~Con_{asm},~~Con_c[(next.Pro_c,~\pi_1.Con_c)\cdot \pi_2.Con_c/\pi_2.Con_c,~\varepsilon/\pi_1.Con_c]>
+~~~if~|E|\leq 3 $ \\
+\hline
+  function call (asm1) & $<Pro_{asm}=B~e,~Mem,~Con_{asm},~Con_c>\rightarrow
+~<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],~~Mem,~Con_{asm},~Con_c>~~if~|\pi_1.\pi_3.Con_c(e)|\leq 3$ \\
+%\hline
+  function call (asm2) & $<BL~e,~Mem,~Con_{asm},~Con_c>~~~~~~~~\rightarrow
+~<\pi_2.\pi_3.Con_c(e)[value{R_0-R_3}/\pi_1.\pi_3.Con_c(e)],~~Mem,~Con_{asm},~Con_c>~~~~if~|\pi_1.\pi_3.Con_c(e)|\leq 3$ \\
+%\hline
+  return (C) & $<Pro_c=return~e,~Mem,~Con_{asm},~Con_c>~\rightarrow
+~<\varepsilon,~Mem,~Con_{asm}[\pi_1.Con_{asm}[e/R_0]/\pi_1.Con_{asm}],~Con_c>$\\
+%\hline
+  return (asm) & $<Pro_{asm}=END,~Mem,~Con_{asm},~Con_c>~~\rightarrow
+~<stmt_1,~Mem,~Con_{asm},~env_1/\pi_1.Con_c],~~Con_c[\pi_2.Con_c'/((stmt_1,~env_1)\cdot \pi_2.Con_c')>$ \\
+%\hline
+  global variable & $<Pro_{asm}=(OP~R_i,~R_j,~A_i),~Mem,~Con_{asm},~Con_c>~\rightarrow
+~<(OP~R_i,~R_j,~Mem(A_i)),~Mem,~Con_{asm},~Con_c>$\\
+  \hline
+\end{tabular}
+\label{integrated}
+\end{table*}
+%$<Pro_{asm}=(OP~R_i,~R_j,~A_i),~Mem,~Con_{asm},~Con_c>~\rightarrow\\ \\$
+%$<(OP~R_i,~R_j,~Mem(A_i)),~Mem,~Con_{asm},~Con_c>$\\ \\
 
 %$\frac{next(C.Pro)=e(E)~~isFunction(e)=true~~fun(e)=Is}{C.Pro=Is;~assign(E, \{R_0-R_3\});~push(stmt, fstack)}$ (C call Assembly)\\ \\
 %$\frac{next(C.Pro)=B~ e~~isFunction(e)=true~~fun(e)=(P,~S)}{assign(\{R_0-R_3\}, P);~C.Pro:=S}$ $~~$(Assembly call C with return)\\ \\
@@ -403,17 +495,80 @@ $<(OP~R_i,~R_j,~Mem(A_i)),~Mem,~Con_{asm},~Con_c>$\\ \\
 \par We implement our semantics in $\mathbb{K}$-a rewrite-based semantic framework in this section. The implementation mainly consists of the syntax of the integrated language, the configuration and the semantics for each statement and instructions. Besides, to demonstrate the effectiveness of the semantics, we applied it on verifying a demo mixed language program in this section.
 
 %\par $\mathbb{K}$ \par We extend both the IMP with function calls and assembler by allowing the IMP-FC programs call assembler functions and assembler programs call IMP-FC functions. Besides, the operand of assembler instructions could be a C variable. Based on the extension of the two languages, we integrate the semantics for them in this section.
-\subsection{Implement the Semantics in K framework}
-The $\mathbb{K}$ Framework is a rewriting based executable semantic framework for defining programming languages, type systems and formal analysis tools using configurations and rules.  We use $\mathbb{K}$ extensively in our work.
-Configurations in $\mathbb{K}$ organize the state in units called cells, which are labeled and can be nested. \emph{Rules} in $\mathbb{K}$ rewrite \emph{configurations} to define valid state transitions. $\mathbb{K}$'s foundations are based in Reachability Logic, which has a sound and relatively complete proof system for
-reasoning about transition systems.
+\subsection{$\mathbb{K}$ Framework}
+$\mathbb{K}$ is a semantic definitional framework based on rewriting logic. Rewriting logic \cite{rewriting} is a computational model for concurrency, distributed algorithms, programming languages, software and hardware systems. It can also be regarded as a logic for executable specification and analysis.  Many languages and systems based on rewriting logic are designed and implemented, such as CafeOBJ \cite{CafeOBJ}, ELAN \cite{ELAN}, Maude \cite{maude} and $\mathbb{K}$, among which,  $\mathbb{K}$  is one of the state-of-the-art frameworks with features of simplicity, executability, analysability, and scalability \cite{kprimer}.
+
+ $\mathbb{K}$ framework is used to analyse the program languages based on their formal semantics. The syntax of language is defined using BNF ( Backus-Naur Form) in $\mathbb{K}$. And the semantic definitions are like operational semantics, which denote the transition rules of the system. $\mathbb{K}$ framework integrates many capabilities of program analysis. Given a syntax and a semantics of a language, $\mathbb{K}$ generates a parser, an interpreter, a model checker through its Maude backend and a deductive theorem prover by translating its semantics into Coq definitions. The parser and interpreter allow a program to execute based on its semantics. Furthermore, the $\mathbb{K}$ can analyse the program more comprehensively than compilers. For example, the model checking capability helps the language designer to cover all the non-deterministic behaviors of certain language through the state-space exploration. The main advantages of $\mathbb{K}$ are:
+\begin{itemize}
+\item $\mathbb{K}$ supports modular definition of formal semantics and user-defined data types.
+\item The formal semantics defined in $\mathbb{K}$ is executable, which provides not only a way to formally analyse programs but a way to test the correctness of defined semantics.
+\item $\mathbb{K}$ framework has many backend formal tools for interpreting programs, model checking and theorem proving.
+\end{itemize}
+\par $\mathbb{K}$ is built upon three main components, which are configuration, computational rules and structural rules. The configuration is a nested cell to present the static state of a program being executed. The basic ingredient of a $\mathbb{K}$ definition is cell, which is labeled and stands for a piece of information of a state. The $\mathbb{K}$ rules are executed by changing the information of states stored in cells. Both computational rules and structural rules are $\mathbb{K}$ rules. The difference is that computational rules are counted as computational steps while structural rules are to rearrange the structure of configuration.For better understanding
+of rewrite rules, consider the following example:
+
+\begin{align}
+&\big\langle \langle \$PGM:pgm \rangle_k~\langle .Map \rangle_{env} \big\rangle_T &  [{\color{blue}{\text{configuration}}}]\notag\\
+&\big\langle\dfrac{X=I; }{.}...\big\rangle_k~ \big\langle X \mapsto  \dfrac{-}{I}...\big\rangle_{env} &  [{\color{blue}{\mathbb{K}~ \text{rule}}}]\notag
+\end{align}
+%\par $\mathbb{K}$ is a rewriting-based programming language semantic framework for defining programming languages, type systems and formal analysis tools using configurations and rules. In $\mathbb{K}$, the definition of a programming language
+%consists of three parts: the syntax, configuration and the semantics. The syntax
+%is given in the form of conventional Backus-Naur Form (BNF). A configuration
+%is a set of labelled, potentially nested units (called cells). It
+%represents the state of the running program and its executing
+%context such as memory, environment, etc. The semantics is defined using rewrite rules (also
+%called semantic rules) over configurations. A rewrite rule describes
+%the one-step transition from a configuration to another
+%configuration. Formally, a rewrite rule is of the form C $\rightarrow$ $C^`$, where C and $C^`$ are configurations. If the configuration on the left-hand side (e.g., C) of a rewrite rule matches the current configuration, the rule fires and rewrites the current configuration as specified by its right-hand side (e.g., $C^`$). Multiple
+%rewrite rules can fire at the same time. For better understanding
+%of rewrite rules, consider the following example:
+
+%\begin{align}
+%&\big\langle \langle \$PGM:pgm \rangle_k~\langle .Map \rangle_{env} \big\rangle_T &  [{\color{blue}{\text{configuration}}}]\notag\\
+%&\big\langle\dfrac{X=I; }{.}...\big\rangle_k~ \big\langle X \mapsto  \dfrac{-}{I}...\big\rangle_{env} &  [{\color{blue}{\mathbb{K}~ \text{rule}}}]\notag
+%\end{align}
+%%%%%rewrite!
+\par The illustrated example shows the $\mathbb{K}$ definition of a configuration and a $\mathbb{K}$ rule. The configuration only contains two cells, one for computation and another for storing the data states of variables. The $k$ cell represents a list (or stack) of computations waiting to be performed. The left-most (i.e., top) element of the stack is the next item to be computed. The $env$ cell is a map of variables to their locations.
+%But if there will be something to be added in this cell, it should have type of Map.
+
+
+\par The second line presents an example of $\mathbb{K}$ rule, which defines the semantics of assignment operation. The fraction-style term in cells indicates the transition from the value over the bar to the one below it. The cells without horizontal lines are only read but not changed by the rule.
+%In the rule, there are two cells  \term{k} and \term{env}. The \term{k} cell represents a list (or stack) of computations waiting to be performed. The left-most (i.e., top) element of the stack is the next item to be computed. The \term{env} cell is a map of variables to their locations.
+When the next statement to be executed is to assign the variable $X$ with value $I$, the map value of variable $X$ should be updated as $I$. In $env$,  the ``-'' is an  anonymous variable, which can match the original value in the corresponding location, and the horizontal line indicates a reduction. The statement $X=I;$ is consumed, as represented by ``.'' which stands for the unit computation. The ``...'' are structural frames to match the irrelevant portions in this cell.
+
+\subsection{Implement the Semantics in $\mathbb{K}$ framework}
+%The $\mathbb{K}$ Framework is a rewriting based executable semantic framework for defining programming languages, type systems and formal analysis tools using configurations and rules.  We use $\mathbb{K}$ extensively in our work.
+%Configurations in $\mathbb{K}$ organize the state in units called cells, which are labeled and can be nested. \emph{Rules} in $\mathbb{K}$ rewrite \emph{configurations} to define valid state transitions. $\mathbb{K}$'s foundations are based in Reachability Logic, which has a sound and relatively complete proof system for
+%reasoning about transition systems.
 \par We give practical insights into the $\mathbb{K}$ framework by defining the integer subset of the ARM assembly language.
- Whereas we defined the entire subset of integer-based instructions, for brevity we only describe a representative snippet of it. Apart from the instruction set presented in Section II, a number of pseudo-instructions
-appear in the executables that we analyze; we have also defined those in $\mathbb{K}$, but we also omit them here. The general methodology for language definitions in $\mathbb{K}$ begins with the (abstract) syntax, determines the configuration, and then gives the semantic rules.
-\par The syntax of the integrated language is the union of IMP and assembly, which we omit the introduction here. The program configuration is wrapped multiset of cells, written as $<cont>_{lbl}$, , where cont is
-the cell contents (possibly itself a multiset of cells) and lbl is the cell label. The $\mathbb{K}$ cells hold the necessary semantic infrastructure (registers, instruction cache, memory, etc.). Two cells appear in most $\mathbb{K}$ definitions: a cell whose label is $\top$ that encloses all the other cells, and a cell labeled k that holds the computation.
+ Whereas we defined the entire subset of integer-based instructions, IMP with function calls and the integrated semantics, for brevity we only describe a representative snippet of it. The general methodology for language definitions in $\mathbb{K}$ begins with the (abstract) syntax, determines the configuration, and then gives the semantic rules. The program configuration is wrapped multiset of cells, written as $<cont>_{lbl}$, , where cont is
+the cell contents (possibly itself a multiset of cells) and lbl is the cell label. The $\mathbb{K}$ cells hold the necessary semantic infrastructure (registers, instruction cache, memory, etc.). Two cells appear in most $\mathbb{K}$ definitions: a cell whose label is $\top$ that encloses all the other cells, and a cell labeled k that holds the computation. In this section, we present how the semantics of assembly and integrated language can be implemented in $\mathbb{K}$. The $\mathbb{K}$ semantics of IMP with function call can be defined in the similar way and we omit the details here.
+\subsubsection{$\mathbb{K}$ Semantics of Assembly}
+\begin{figure}
+rule STORE \\ \\
+$\big\langle\frac{STR~r~I,~X}{.K}...\big\rangle_k~~~\big\langle... I |-> I1 ... \big\rangle_{reg}$\\
+$\big\langle... X |-> L ...\big\rangle_{env}~~~\big\langle ... L |->\frac{\underline{\hbox to 2mm{}}}{I1}...\big\rangle_{store}$\\
 
+rule ADD \\ \\
+$\big\langle\frac{ADD ~r~I,~I2,~I3}{.}...\big\rangle_k~~~\big\langle\frac{R}{R[I<-(I2~+Int~I3)]}\big\rangle_{reg}$\\
 
+rule CMP \\ \\
+$\big\langle\frac{CMP~r~I,~I2,~I3}{.}...\big\rangle_k~~~\big\langle ... I|->I2 ...\big\rangle_{reg}$\\
+$\big\langle\frac{R}{R[0<-(I2~==Int~I1)]}\big\rangle_{sreg}$\\
+
+rule B \\ \\
+$\big\langle\frac{B~X\sim >K}{Is}\big\rangle_k~~~\big\langle ... X|->functionBody(Is)...\big\rangle_{fun}$
+
+\caption{Semantics for Assembly}
+\label{assem}
+\end{figure}
+\par We have implemented the semantics for all the ARM instructions listed in TABLE I in $\mathbb{K}$, Figure \ref{assem} lists some of them. We take four semantic rules as example to illustrate how we define the execution rules for the memory operation, arithmetic expression, logical expression and jump instruction respectively.
+\par The program to be executed should be stored in the $k$ cell. In case the next instruction to be executed is $STR~rI,~X$, it should be the top of the computation stack. After execution, this instruction has been consumed and reduced to empty, which is represented as $.K$ in the $\mathbb{K}$ semantics. The $...$ in $k$ cell means there may be some instructions left to be executed but we do not care about them right now. $STR$ is to assign the value stored in the register with index $I$ to the variable $X$. Thus we have to located the address of variable $X$ from the cell $env$, and then store the value of register $I$ to the corresponding address.
+\par The execution rule of instruction $ADD$ and $CMP$ the quite similar. Before execution the instruction, we have read the values of the source operands and replaced the register indexes with their values. Then the execution of $ADD$ (or other arithmetic expressions) is to store the addition (or the corresponding calculation) of the two operands to the destination register. Similarly, the execution of $CMP$ (or other logic expression) is to store the comparison (or the corresponding logic operation) result to the flag bit of status register.
+\par Some instruction fragment are labeled by an identifier (represented as $I$). We regard such an instruction fragment as a function with name $I$ and put it into the function stack. As for the jump instruction $B~X$, it can be considered as a function call instruction which is calling the function with name $X$. The execution of $B~X$ is to take out the function body $IS$ of $X$ from the function stack, as shown in the last rule of Figure \ref{assem}.
+
+\subsubsection{$\mathbb{K}$ Semantics of the Integrated language}
+\par We implement the semantics of integrated language in $\mathbb{K}$ as shown in Figure \ref{semantics}, including the transition rules for function calls and function returns. Basically, the execution rules for instructions $B$ and $BL$ are same. Both of them are reduced to a helper function $AssPara(Ps,~0)$, which is to pass the value of registers to the parameters of the function. Besides, the function body of function $X$ is added to the computation cell to execute after passing the parameters.
 \begin{figure}
 rule B\\ \\
 $\big\langle\frac{B~X:Id\curvearrowright \underline{\hbox to 2mm{}}}{AssPara(Ps,~0)\curvearrowright Ss}\big\rangle_k$$~~~\big\langle\frac{.List}{ListItem((.K))}...\big\rangle_{fstack}$\\ \\
@@ -446,10 +601,9 @@ $~~~\big\langle\frac{ListItem((Env,~K))}{.List} ...\big\rangle_{fstack}$
   \caption{Semantic rules for integrated language}
   \label{semantics}
 \end{figure}
-
-\par We implement the semantics of integrated language in $\mathbb{K}$ as shown in Figure \ref{semantics}, including the transition rules for function calls and function returns. Basically, the execution rules for instructions $B$ and $BL$ are same. Both of them are reduced to a helper function $AssPara(Ps,~0)$, which is to pass the value of registers to the parameters of the function. Besides, the function body of function $X$ is added to the computation cell to execute after passing the parameters.
 \par In case of calling assembly functions by IMP programs, the function call statement $F1:Id(As:AExps)$ with its execution context are reduced to a helper function $AssReg(As,~0)$, which is to pass the parameters to the first four registers. The instructions labelled by F1 are to be executed after  passing parameters. Furthermore, the execution and environment context should be added into the cell of $fstack$.
 \par The last two semantic rules are about function return, i.e., return from IMP function to the assembly program and return from the assembler function to IMP programs. In case of returning to assembly program from IMP, the return value should be stored to the first register (shown as $ldr~r0,~I$) and the execution context $K$ of the calling function should be restored. Similarly, the case of returning from assembler function to IMP is also asked for restore the execution context and get out the value of the first register.
+
 \subsection{Application of the formal semantics}
 \par One particularly useful formal analysis tool developed for $\mathbb{K}$ is the Reachability Logic prover. This prover
 accepts as input a $\mathbb{K}$ definition and a set of logical reachability claims to prove. The prover then attempts
@@ -467,13 +621,14 @@ int result;
 s=10;
 result=loop(s);
 return result;}
+_asm_{
 loop
-add r 2, r 2, #1
-add r 1, r 1, r 2
-cmp r 0, r 2
+ADD r 2, r 2, #1
+ADD r 1, r 1, r 2
+CMP r 0, r 2
 BEQ END
 B loop
-END
+END}
 \end{lstlisting}
 \vspace{11pt}
 
@@ -560,8 +715,6 @@ END
 \par The above two interrupt functions are often called in pairs when atomic operation is needed. For instance, an atomic operation context switch should take place when the system call schedule is called, which means the functions $DisableAllInterrupts$ and $EnableAllInterrupts$ are being called in case of performing scheduling. As we know, the $schedule$ system call is often implemented in high level language (i.e., C language) except the operations which need to access registers. Thus the implementation of $schedule$ is in mixed language. We take this system call as an example to demonstrate how our semantics can be applied to verify operating system kernels.
 %����ʱ���жϵı�Ҫ�ԣ����ȳ���������
 \subsection{Verifying the interruption mechanism}
-\par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) \cite{osek} kernel, whose formal semantics of system calls have been defined in \cite{xiaoran}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
-\par We integrate our semantics with the semantics defined in \cite{} to apply our semantics on verifying operating systems. since we have only defined semantics for some basic C statements exclude pointers, arrays and some other complex data structures at present, we regard the statement with such data structures as a special statement and define its execution rule in our semantics. The implementation of the OSEK-based system call $schedule()$ is shown in figure \ref{}
 \vspace{11pt}
 \begin{lstlisting}[xleftmargin=1em]
 schedule()
@@ -579,7 +732,9 @@ EnableAllInterrupts();
 }
 \end{lstlisting}
 \vspace{11pt}	
+\par We looked into the implementation of an industrial OSEK-based operating system (OSEK OS for abbreviation) \cite{osek} kernel, whose formal semantics of system calls have been defined in \cite{xiaoran}. The schedule mechanism of OSEK OS is based on priority scheduling algorithm, which means the scheduler always allocate the processor to the task with the highest priority. To remain the tasks in ready queue unchanged, the system call $schedule()$ should disable interrupts before choosing the next allocated task and enable the interrupts after assigning the processor to the task.
 
+\par We integrate our semantics with the semantics defined in \cite{xiaoran} to apply our semantics on verifying operating systems. since we have only defined semantics for some basic C statements exclude pointers, arrays and some other complex data structures at present, we regard the statement with such data structures as a special statement and define its execution rule in our semantics. The implementation of the OSEK-based system call $schedule()$ is shown below.
 \vspace{11pt}
 \lstset{style=k}
 \begin{minipage}{0.7\textwidth}
@@ -587,16 +742,30 @@ EnableAllInterrupts();
 \begin{BVerbatim}
 rule
 <k>
-loop(S:Int)=>S...</k>
-<env>...ENV:Map...</env>
+if (OSReadyQueue.First.Prio>OSRunningTcb.Prio)
+{
+nextTask.Tcb=OSReadyQueue(First.Tcb);
+OSReadyQueueRemove(First.Id, First.Prio);
+OSReadyQueueAppend(osRunningTask,
+                   osRunningTcb.Prio);
+OSRunningTcb=nextTask.Tcb;
+}
+else{}
+=>.K
+...</k>
+<store>...ENV:Map...</store>
+<sreg>SREG:Map</sreg>
+<readyTasks>
+(T, N) L => add(T1, N1, L)
+</readyTasks>
+<runningTask> T1:Id => T </runningTask>
 <store>...STORE:Map...</store>
-<fun>...FUN:Map...</fun>
-<reg>.Map=>Reg:Map</reg>
-<sreg>.Map=>Sreg:Map</sreg>
-requires S>=Int 0
+requires N >Int N1
 \end{BVerbatim}
 \end{minipage}\\
 \vspace{11pt}
+\par As for the system service $schedule()$, we should guarantee that there is no interruption in the process of context switch so that the states of tasks could not be changed. The property of $schedule()$ is specified is specified in the below. First of all, we should make sure that the state of status register can not be changed (as shown in the cell $<sreg>$), which means interruption can not happen. Besides, in case there is a task $T$ with a higher priority in the ready task list, the processor will be allocated to $T$ and put the previous task to the ready list (as shown in the cell $<readyTasks>$ and $<runningTask>$). We only list the specification for the case when a task is allocated with a processor here, while we have also specified another case where the running task has the highest priority and no state transition occurs in our project.
+
 \section{related work}
 \par In this sections, we discuss some related works in three aspects, i.e. the integrated semantics for mixed language, semantics defined in $\mathbb{K}$ framework and the research on verifying OS kernels.
 \subsection{integrated semantics}
@@ -622,8 +791,9 @@ about interrupts to verify key modules in the μC/OS-II kernel
 in Coq. All these impressive achievements need construct
 a machine-checkable proof and come with a non-trivial cost. In our work, the mixed language programs could be verified automatically thanks to the Z3-based \cite{Z3} verifying engine provided by $\mathbb{K}$.
 
-To reduce the verification efforts, automatic OS kernel verification has long been a research objective. \cite{hyperkernel} translates both C and assembler implementations to LLVM \cite{llvm} and adopts the LLVM verifier to verify the correctness of the OS kernel. \cite{jizheng} abstract the assembler programs to C level and verify the OS kernel with the C verifier. \cite{Ironclad} compiles C to assembler and conducts all
+To reduce the verification efforts, automatic OS kernel verification has long been a research objective. \cite{hyperkernel} translates both C and assembler implementations to LLVM \cite{llvm} and adopts the LLVM verifier to verify the correctness of the OS kernel. \cite{ding} abstracts the assembler programs to C level and verify the OS kernel with the C verifier. \cite{Ironclad} compiles C to assembler and conducts all
 verification at assembly level with Dafny \cite{dafny}. The verifier deployed by the above works are all based Z3, which is also used by $\mathbb{K}$. Compared with these works, our approach needs no translation of the program. In this case, developers do not need to learn a new language to verify the OS kernel. On the other side, keeping the programs untouched would not affect the readability of the system implementation, which is easier to specify properties for the system.
+\par Interrupt mechanism of OS kernel is an interesting topic that attracts many researchers. \cite{huang} proposes an interrupting modeling language, and defines the operational semantics and denotational semantics for it to analyze systems with interruption. Compared with this work, our approach does not need to define denotational semantics and can verify the interrupt mechanism automatically. \cite{shi} verifies the properties of interrupt mechanism from binary code level by applying PRISM. The basic idea of this work is to abstract an particular interrupt mechanism as a discrete-Time markov chain, which is not as general as the approach proposed in this paper.
 \section{Conclusion and Future Work}
 \par This paper presented an integrated semantics for assembler and a high level language. The integrated semantics not only take function calls and function returns between the two languages into account, but also specified the transaction rules for the cases when a global variable could be accessed by different languages. We adopted an executable semantic framework $\mathbb{K}$ to implement our semantics and verified the correctness of a mixed language program. To demonstrate the effectiveness of our semantics, we applied it to verifying the schedule mechanism of an industrial operating system kernel.
 \par As future work, we are considering to
